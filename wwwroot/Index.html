@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoMate It</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-from: #667eea;
+      --brand-to: #764ba2;
+    }
+
+    body { background: #f0f2f8; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
+
+    /* ── Views ─────────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Home ──────────────────────────────────────── */
+    #view-home {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--brand-from) 0%, var(--brand-to) 100%);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; color: white;
+    }
+    .home-title {
+      font-size: 4.5rem; font-weight: 800; letter-spacing: -2px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .home-subtitle {
+      font-size: 1.25rem; opacity: 0.88; max-width: 520px; margin: 0 auto 2.5rem;
+    }
+    .btn-solve {
+      background: white; color: var(--brand-from); font-weight: 700;
+      font-size: 1.15rem; padding: 0.85rem 3rem; border-radius: 50px;
+      border: none; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-solve:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
+
+    /* ── App Shell ─────────────────────────────────── */
+    .app-header {
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      color: white; padding: 1rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .app-header .brand { font-size: 1.4rem; font-weight: 800; cursor: pointer; }
+    .breadcrumb-nav { font-size: 0.9rem; opacity: 0.85; }
+    .breadcrumb-nav span { cursor: pointer; }
+    .breadcrumb-nav span:hover { text-decoration: underline; }
+
+    /* ── Topics Grid ───────────────────────────────── */
+    .topic-card {
+      background: white; border-radius: 16px; padding: 1.75rem;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); border: 2px solid transparent;
+      position: relative; overflow: hidden;
+    }
+    .topic-card:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(102,126,234,0.2); border-color: var(--brand-from); }
+    .topic-card.locked { opacity: 0.6; cursor: default; }
+    .topic-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .topic-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .topic-desc { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
+    .topic-progress { font-size: 0.8rem; color: #888; }
+    .coming-soon-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: #f0f0f0; color: #999;
+      font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ── Problem List ──────────────────────────────── */
+    .problem-row {
+      background: white; border-radius: 12px; padding: 1.1rem 1.4rem;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid transparent;
+    }
+    .problem-row:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.18); border-left-color: var(--brand-from); }
+    .problem-row.solved { border-left-color: #28a745; }
+    .difficulty-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .diff-Easy   { background: #d4edda; color: #155724; }
+    .diff-Medium { background: #fff3cd; color: #856404; }
+    .diff-Hard   { background: #f8d7da; color: #721c24; }
+
+    /* ── Solver ────────────────────────────────────── */
+    .solver-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.09); overflow: hidden; }
+    .code-editor {
+      font-family: 'Consolas', 'Monaco', monospace; font-size: 13.5px;
+      border: 1px solid #dee2e6; border-radius: 8px; resize: vertical;
+    }
+    .output-box {
+      background: #1e1e2e; color: #cdd6f4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px; border-radius: 8px; white-space: pre-wrap;
+      min-height: 140px; padding: 1rem;
+    }
+    .problem-data-box {
+      background: #f8f9ff; border: 1px solid #e0e4ff; border-radius: 10px;
+      padding: 1rem 1.25rem; font-family: 'Consolas', monospace; font-size: 14px;
+      margin-bottom: 1rem;
+    }
+    .guess-history { max-height: 200px; overflow-y: auto; }
+    .guess-entry {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.75rem; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem;
+    }
+    .guess-entry.too_low  { background: #fff3cd; }
+    .guess-entry.too_high { background: #f8d7da; }
+    .guess-entry.correct  { background: #d4edda; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════ HOME -->
+<div id="view-home" class="view active">
+  <div>
+    <div class="home-title">AutoMate It</div>
+    <p class="home-subtitle mt-3">
+      Master Data Structures &amp; Algorithms through hands-on coding challenges.
+      Write real Python, get real feedback.
+    </p>
+    <button class="btn btn-solve" onclick="goTopics()">Start Solving →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════ APP SHELL -->
+<div id="app-shell" style="display:none;">
+  <div class="app-header">
+    <div class="brand" onclick="goHome()">AutoMate It</div>
+    <div class="breadcrumb-nav" id="breadcrumb"></div>
+  </div>
+
+  <!-- Topics View -->
+  <div id="view-topics" class="view container py-4">
+    <h4 class="mb-1 fw-bold">Choose a Topic</h4>
+    <p class="text-muted mb-4">Select a data structure or algorithm category to begin.</p>
+    <div id="topics-grid" class="row g-3"></div>
+  </div>
+
+  <!-- Problems View -->
+  <div id="view-problems" class="view container py-4">
+    <h4 class="mb-1 fw-bold" id="topic-heading"></h4>
+    <p class="text-muted mb-4" id="topic-subheading"></p>
+    <div id="problems-list" class="d-flex flex-column gap-3"></div>
+  </div>
+
+  <!-- Solver View -->
+  <div id="view-solver" class="view container py-4">
+    <div class="solver-card">
+      <!-- Header -->
+      <div class="p-4 pb-0">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-1" id="solver-title"></h5>
+            <span id="solver-difficulty" class="difficulty-badge"></span>
+          </div>
+          <span id="solver-solved-badge"></span>
+        </div>
+        <p class="text-muted mt-2 mb-0" id="solver-description"></p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="px-4 pt-3">
+        <ul class="nav nav-tabs" id="solverTabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="tab-manual-btn" onclick="switchTab('manual')">🎮 Manual</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tab-code-btn" onclick="switchTab('code')">🤖 Automate</button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Manual Tab -->
+      <div id="tab-manual" class="p-4">
+        <div class="alert alert-info" id="manual-instructions"></div>
+
+        <!-- Guess mode: number input -->
+        <div id="manual-guess-ui">
+          <div class="d-flex gap-2 mb-3" style="max-width:320px">
+            <input type="number" id="guess-input" class="form-control" placeholder="Enter number (1–100)" min="1" max="100" onkeydown="if(event.key==='Enter') submitManual()" />
+            <button class="btn btn-primary" onclick="submitManual()">Guess</button>
+          </div>
+          <div class="guess-history" id="guess-history"></div>
+        </div>
+
+        <!-- Answer mode: data display + text input -->
+        <div id="manual-answer-ui" style="display:none">
+          <div class="problem-data-box" id="manual-data-display"></div>
+          <div class="d-flex gap-2 mb-3" style="max-width:480px">
+            <input type="text" id="answer-input" class="form-control" placeholder="Your answer…" onkeydown="if(event.key==='Enter') submitManual()" />
+            <button class="btn btn-primary" onclick="submitManual()">Submit</button>
+          </div>
+        </div>
+
+        <div id="manual-result" class="alert mt-2" style="display:none"></div>
+        <button class="btn btn-outline-secondary btn-sm mt-2" onclick="loadHint()">💡 Get Hint</button>
+        <div id="hint-box" class="alert alert-info mt-2" style="display:none"></div>
+      </div>
+
+      <!-- Code Tab -->
+      <div id="tab-code" class="p-4" style="display:none">
+        <div class="alert alert-secondary" id="code-instructions"></div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Python Code</label>
+          <textarea id="code-editor" class="form-control code-editor" rows="14"></textarea>
+        </div>
+
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+          <button class="btn btn-success" onclick="runCode()">▶ Run Code</button>
+          <button class="btn btn-outline-secondary" onclick="loadExample()">📋 Load Example</button>
+          <button class="btn btn-outline-danger" onclick="clearCode()">🗑 Clear</button>
+        </div>
+
+        <label class="form-label fw-semibold">Output</label>
+        <div id="output-box" class="output-box">Run your code to see output here…</div>
+
+        <div id="code-result" class="alert mt-3" style="display:none"></div>
+      </div>
+    </div><!-- /solver-card -->
+  </div><!-- /view-solver -->
+</div><!-- /app-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const API = '/api';
+let state = { topicId: null, topicName: '', problemId: null, problem: null, guessMode: false };
+
+// ════════════════════════════════ NAVIGATION
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('view-home').style.display = 'flex';
+  document.getElementById('view-home').classList.add('active');
+}
+
+async function goTopics() {
+  document.getElementById('view-home').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'block';
+  setBreadcrumb([{ label: 'Topics' }]);
+  showView('view-topics');
+  await loadTopics();
+}
+
+async function goProblems(topicId, topicName) {
+  state.topicId = topicId; state.topicName = topicName;
+  setBreadcrumb([
+    { label: 'Topics', action: goTopics },
+    { label: topicName }
+  ]);
+  showView('view-problems');
+  await loadProblems(topicId, topicName);
+}
+
+async function goSolver(problemId) {
+  state.problemId = problemId;
+  setBreadcrumb([
+    { label: 'Topics', action: goTopics },
+    { label: state.topicName, action: () => goProblems(state.topicId, state.topicName) },
+    { label: '…' }
+  ]);
+  showView('view-solver');
+  await loadSolver(problemId);
+}
+
+function setBreadcrumb(items) {
+  const el = document.getElementById('breadcrumb');
+  el.innerHTML = items.map((item, i) => {
+    const sep = i === 0 ? '' : '<span class="mx-1 opacity-50">/</span>';
+    if (item.action)
+      return `${sep}<span onclick="(${item.action.toString()})()">${item.label}</span>`;
+    return `${sep}<span class="opacity-75">${item.label}</span>`;
+  }).join('');
+}
+
+// ════════════════════════════════ TOPICS
+
+async function loadTopics() {
+  const grid = document.getElementById('topics-grid');
+  grid.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
+  const topics = await fetchJSON(`${API}/topics`);
+  grid.innerHTML = topics.map(t => `
+    <div class="col-sm-6 col-lg-3">
+      <div class="topic-card ${t.isAvailable ? '' : 'locked'}" onclick="${t.isAvailable ? `goProblems(${t.topicId}, '${t.name}')` : ''}">
+        ${!t.isAvailable ? '<span class="coming-soon-badge">Coming Soon</span>' : ''}
+        <div class="topic-icon">${t.icon}</div>
+        <div class="topic-name">${t.name}</div>
+        <div class="topic-desc">${t.description}</div>
+        ${t.isAvailable ? `
+          <div class="topic-progress">
+            ${t.solvedCount}/${t.problemCount} solved
+            <div class="progress mt-1" style="height:5px">
+              <div class="progress-bar bg-success" style="width:${t.problemCount ? (t.solvedCount/t.problemCount*100) : 0}%"></div>
+            </div>
+          </div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════ PROBLEMS
+
+async function loadProblems(topicId, topicName) {
+  document.getElementById('topic-heading').textContent = topicName;
+  document.getElementById('topic-subheading').textContent = 'Choose a problem to solve.';
+  const list = document.getElementById('problems-list');
+  list.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+  const problems = await fetchJSON(`${API}/topics/${topicId}/problems`);
+  list.innerHTML = problems.map(p => `
+    <div class="problem-row ${p.isSolved ? 'solved' : ''}" onclick="goSolver(${p.problemId})">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <div class="fw-semibold">${p.title}
+            ${p.isSolved ? ' <span class="text-success ms-1">✅</span>' : ''}
+          </div>
+          <div class="text-muted small mt-1">${p.description}</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="difficulty-badge diff-${p.difficulty}">${p.difficulty}</span>
+          <span class="text-muted">›</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════ SOLVER
+
+async function loadSolver(problemId) {
+  const p = await fetchJSON(`${API}/problems/${problemId}`);
+  state.problem = p;
+  state.guessMode = p.problemData?.type === 'guess';
+
+  // Update breadcrumb with real title
+  setBreadcrumb([
+    { label: 'Topics', action: goTopics },
+    { label: state.topicName, action: () => goProblems(state.topicId, state.topicName) },
+    { label: p.title }
+  ]);
+
+  document.getElementById('solver-title').textContent = p.title;
+  document.getElementById('solver-description').textContent = p.description;
+  const diffEl = document.getElementById('solver-difficulty');
+  diffEl.textContent = p.difficulty;
+  diffEl.className = `difficulty-badge diff-${p.difficulty}`;
+  document.getElementById('solver-solved-badge').innerHTML = p.isSolved
+    ? '<span class="badge bg-success fs-6">✅ Solved</span>' : '';
+
+  // Instructions
+  document.getElementById('manual-instructions').innerHTML =
+    `<strong>Instructions:</strong> ${p.instructions}`;
+  document.getElementById('code-instructions').innerHTML =
+    state.guessMode
+      ? `<strong>Available:</strong> <code>guess(n)</code> — returns <code>'too_low'</code>, <code>'too_high'</code>, or <code>'correct'</code>. The variable <code>number</code> is NOT available; you must search for it.`
+      : `<strong>Available:</strong> problem data is injected as Python variables. Call <code>answer(result)</code> exactly once with your computed answer.`;
+
+  // Manual tab UI
+  if (state.guessMode) {
+    document.getElementById('manual-guess-ui').style.display = '';
+    document.getElementById('manual-answer-ui').style.display = 'none';
+    document.getElementById('guess-history').innerHTML = '';
+    document.getElementById('guess-input').value = '';
+  } else {
+    document.getElementById('manual-guess-ui').style.display = 'none';
+    document.getElementById('manual-answer-ui').style.display = '';
+    renderDataDisplay(p.problemData);
+    document.getElementById('answer-input').value = '';
+  }
+
+  // Reset result/hint
+  document.getElementById('manual-result').style.display = 'none';
+  document.getElementById('hint-box').style.display = 'none';
+  document.getElementById('output-box').textContent = 'Run your code to see output here…';
+  document.getElementById('code-result').style.display = 'none';
+
+  // Load example code
+  loadExample();
+  switchTab('manual');
+}
+
+function renderDataDisplay(data) {
+  const el = document.getElementById('manual-data-display');
+  if (!data) { el.textContent = ''; return; }
+  const lines = [];
+  if (data.arr !== undefined) lines.push(`arr = [${data.arr.join(', ')}]`);
+  if (data.target !== undefined) lines.push(`target = ${data.target}`);
+  if (data.s !== undefined) lines.push(`s = "${data.s}"`);
+  el.textContent = lines.join('\n');
+}
+
+// ════════════════════════════════ TABS
+
+function switchTab(tab) {
+  document.getElementById('tab-manual').style.display = tab === 'manual' ? '' : 'none';
+  document.getElementById('tab-code').style.display   = tab === 'code'   ? '' : 'none';
+  document.getElementById('tab-manual-btn').classList.toggle('active', tab === 'manual');
+  document.getElementById('tab-code-btn').classList.toggle('active', tab === 'code');
+}
+
+// ════════════════════════════════ MANUAL
+
+async function submitManual() {
+  const value = state.guessMode
+    ? document.getElementById('guess-input').value
+    : document.getElementById('answer-input').value;
+
+  if (!value.trim()) return;
+
+  const res = await postJSON(`${API}/problems/${state.problemId}/manual`, { value });
+
+  if (state.guessMode) {
+    const history = document.getElementById('guess-history');
+    const entry = document.createElement('div');
+    entry.className = `guess-entry ${res.feedback}`;
+    entry.innerHTML = `<strong>Guess ${value}:</strong> ${res.message}`;
+    history.prepend(entry);
+    if (res.isCorrect) {
+      document.getElementById('guess-input').value = '';
+      showResult('manual-result', res.message, 'success');
+      refreshSolvedBadge();
+    }
+  } else {
+    showResult('manual-result', res.message, res.isCorrect ? 'success' : 'warning');
+    if (res.isCorrect) refreshSolvedBadge();
+  }
+}
+
+// ════════════════════════════════ CODE
+
+function loadExample() {
+  document.getElementById('code-editor').value = state.problem?.exampleCode || '';
+}
+
+function clearCode() {
+  document.getElementById('code-editor').value = '';
+  document.getElementById('output-box').textContent = 'Run your code to see output here…';
+  document.getElementById('code-result').style.display = 'none';
+}
+
+async function runCode() {
+  const code = document.getElementById('code-editor').value.trim();
+  if (!code) { alert('Write some code first.'); return; }
+
+  const btn = document.querySelector('button[onclick="runCode()"]');
+  btn.disabled = true; btn.textContent = '⏳ Running…';
+
+  document.getElementById('output-box').textContent = 'Executing…';
+  document.getElementById('code-result').style.display = 'none';
+
+  try {
+    const res = await postJSON(`${API}/problems/${state.problemId}/code`, { code });
+    document.getElementById('output-box').textContent = res.isSuccess ? res.output : `Error:\n${res.error}`;
+
+    if (res.isSuccess) {
+      const correct = res.isCorrect === true;
+      const wrong   = res.isCorrect === false;
+      const statusMsg = correct
+        ? `✅ Correct!${res.guessCount ? ` Found in <strong>${res.guessCount}</strong> guess(es).` : ''}`
+        : wrong ? `❌ Code ran but the answer was incorrect.${res.guessCount ? ` (${res.guessCount} guess(es) made)` : ''}` : '';
+
+      const complexity = res.timeComplexity ? `<strong>⏱ Complexity:</strong> ${res.timeComplexity}` : '';
+      const parts = [complexity, statusMsg].filter(Boolean).join('<br>');
+      if (parts) showResult('code-result', parts, correct ? 'success' : 'warning');
+
+      if (correct) refreshSolvedBadge();
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = '▶ Run Code';
+  }
+}
+
+// ════════════════════════════════ HINTS
+
+async function loadHint() {
+  const box = document.getElementById('hint-box');
+  const data = await fetchJSON(`${API}/problems/${state.problemId}/hints`);
+  box.innerHTML = `<strong>💡 Hints:</strong><ul class="mb-0 mt-1">${data.hints.map(h => `<li>${h}</li>`).join('')}</ul>`;
+  box.style.display = '';
+}
+
+// ════════════════════════════════ HELPERS
+
+function showResult(id, msg, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = msg;
+  el.className = `alert alert-${type}`;
+  el.style.display = '';
+}
+
+function refreshSolvedBadge() {
+  document.getElementById('solver-solved-badge').innerHTML =
+    '<span class="badge bg-success fs-6">✅ Solved</span>';
+  // Also refresh topics/problems lists in background
+}
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+async function postJSON(url, body) {
+  const r = await fetch(url, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+</script>
+</body>
+</html>
