@@ -22,9 +22,13 @@ namespace NumberGuessingApp.Models
         public string Title { get; init; } = "";
         public string Description { get; init; } = "";
         public string Difficulty { get; init; } = "";
+        public string ManualInstructions { get; init; } = "";
         public string Instructions { get; init; } = "";
         public string ExampleCode { get; init; } = "";
+        public string ScaffoldCode { get; init; } = "";
+        public int? PrerequisiteId { get; init; }
         public bool IsSolved { get; init; }
+        public bool IsLocked { get; init; }
         public object? ProblemData { get; init; }
     }
 

@@ -7,507 +7,1351 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     :root {
-      --brand-from: #667eea;
-      --brand-to: #764ba2;
+      --brand:   #667eea;
+      --brand2:  #764ba2;
+      --dark:    #1e1b4b;
+      --darker:  #13112e;
+      --surface: #f8fafc;
+      --border:  #e2e8f0;
+      --text:    #1e293b;
+      --muted:   #64748b;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:'Segoe UI',sans-serif; color:var(--text); background:var(--surface); }
+
+    /* ── Shared ──────────────────────────────── */
+    .view { display:none; }
+    .view.active { display:block; }
+
+    /* ════════════════════════════════════════════
+       LANDING PAGE
+    ═══════════════════════════════════════════ */
+    #view-landing { background:white; }
+
+    .landing-nav {
+      position:sticky; top:0; z-index:100;
+      background:var(--dark); color:white;
+      padding:.9rem 2rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .landing-nav .brand { font-weight:800; font-size:1.25rem; letter-spacing:-.5px; }
+    .landing-nav .nav-right { font-size:.85rem; opacity:.7; }
+
+    .hero {
+      background:linear-gradient(135deg, var(--dark) 0%, var(--brand2) 60%, var(--brand) 100%);
+      color:white; padding:5rem 2rem 6rem;
+      text-align:center;
+    }
+    .hero-label {
+      display:inline-block; background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:50px; padding:.35rem 1rem; font-size:.8rem;
+      letter-spacing:.5px; margin-bottom:1.5rem;
+    }
+    .hero h1 { font-size:3.5rem; font-weight:800; line-height:1.1; margin-bottom:1.25rem; }
+    .hero h1 span { color:#a5b4fc; }
+    .hero p  { font-size:1.15rem; opacity:.85; max-width:560px; margin:0 auto 2.5rem; line-height:1.7; }
+    .btn-enter {
+      background:white; color:var(--dark); font-weight:700;
+      font-size:1.05rem; padding:.85rem 2.5rem; border-radius:50px;
+      border:none; box-shadow:0 8px 30px rgba(0,0,0,.3);
+      cursor:pointer; transition:all .2s;
+    }
+    .btn-enter:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.4); }
+
+    /* Steps */
+    .steps { padding:5rem 2rem; background:white; }
+    .steps h2 { text-align:center; font-weight:800; font-size:2rem; margin-bottom:.5rem; }
+    .steps .sub { text-align:center; color:var(--muted); margin-bottom:3rem; }
+    .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:2rem; max-width:1000px; margin:0 auto; }
+    .step-card { border:1px solid var(--border); border-radius:16px; padding:2rem; }
+    .step-num { font-size:2.5rem; font-weight:900; color:#e0e7ff; margin-bottom:.75rem; }
+    .step-card h3 { font-weight:700; font-size:1.1rem; margin-bottom:.5rem; }
+    .step-card p  { color:var(--muted); font-size:.9rem; line-height:1.6; }
+
+    /* Features strip */
+    .features {
+      background:var(--dark); color:white;
+      padding:3rem 2rem; text-align:center;
+    }
+    .features h2 { font-weight:800; font-size:1.6rem; margin-bottom:2rem; }
+    .feat-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem; }
+    .feat-item {
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:1rem 1.5rem; font-size:.9rem; max-width:220px;
+    }
+    .feat-icon { font-size:1.8rem; margin-bottom:.5rem; }
+
+    /* ════════════════════════════════════════════
+       MODE SELECTION
+    ═══════════════════════════════════════════ */
+    #view-mode { min-height:100vh; background:var(--surface); }
+    .mode-inner {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; padding:2rem;
+    }
+    .mode-back { align-self:flex-start; background:none; border:none; color:var(--muted); cursor:pointer; font-size:.9rem; margin-bottom:2rem; }
+    .mode-back:hover { color:var(--text); }
+    .mode-heading { font-size:2rem; font-weight:800; text-align:center; margin-bottom:.5rem; }
+    .mode-sub { color:var(--muted); text-align:center; margin-bottom:3rem; }
+    .mode-cards { display:grid; grid-template-columns:1fr 1fr; gap:2rem; max-width:760px; width:100%; }
+    @media(max-width:600px){ .mode-cards { grid-template-columns:1fr; } }
+    .mode-card {
+      background:white; border:2px solid var(--border); border-radius:20px;
+      padding:2.5rem 2rem; text-align:center; cursor:pointer; transition:all .25s;
+    }
+    .mode-card:hover { border-color:var(--brand); box-shadow:0 12px 40px rgba(102,126,234,.2); transform:translateY(-4px); }
+    .mode-card .mc-icon { font-size:3rem; margin-bottom:1rem; }
+    .mode-card h3 { font-weight:800; font-size:1.25rem; margin-bottom:.75rem; }
+    .mode-card p  { color:var(--muted); font-size:.9rem; line-height:1.6; margin-bottom:1.5rem; }
+    .mc-stat { font-size:.8rem; color:var(--brand); font-weight:600; margin-bottom:1.5rem; }
+    .mc-btn {
+      display:inline-block; background:var(--dark); color:white;
+      padding:.65rem 1.75rem; border-radius:50px; font-size:.9rem; font-weight:600;
     }
 
-    body { background: #f0f2f8; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
+    /* ════════════════════════════════════════════
+       APP SHELL (shared by challenges / topics / problems / solver)
+    ═══════════════════════════════════════════ */
+    .app-nav {
+      background:var(--dark); color:white;
+      padding:0 1.5rem; height:56px;
+      display:flex; align-items:center; gap:2rem;
+      position:sticky; top:0; z-index:100;
+    }
+    .app-nav .brand { font-weight:800; font-size:1.1rem; cursor:pointer; margin-right:1rem; }
+    .nav-tabs-custom { display:flex; gap:0; height:100%; }
+    .nav-tab {
+      padding:0 1.25rem; display:flex; align-items:center;
+      font-size:.88rem; color:rgba(255,255,255,.6); cursor:pointer;
+      border-bottom:3px solid transparent; transition:all .2s;
+    }
+    .nav-tab:hover  { color:rgba(255,255,255,.9); }
+    .nav-tab.active { color:white; border-bottom-color:#a5b4fc; }
+    .nav-right-info { margin-left:auto; font-size:.8rem; color:rgba(255,255,255,.45); }
 
-    /* ── Views ─────────────────────────────────────── */
-    .view { display: none; }
-    .view.active { display: block; }
+    /* Breadcrumb bar */
+    .bc-bar {
+      background:white; border-bottom:1px solid var(--border);
+      padding:.5rem 1.5rem; font-size:.82rem; color:var(--muted);
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .bc-bar span { cursor:pointer; }
+    .bc-bar span:hover { color:var(--brand); }
+    .bc-sep { opacity:.4; }
 
-    /* ── Home ──────────────────────────────────────── */
-    #view-home {
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--brand-from) 0%, var(--brand-to) 100%);
-      display: flex; align-items: center; justify-content: center;
-      text-align: center; color: white;
-    }
-    .home-title {
-      font-size: 4.5rem; font-weight: 800; letter-spacing: -2px;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    }
-    .home-subtitle {
-      font-size: 1.25rem; opacity: 0.88; max-width: 520px; margin: 0 auto 2.5rem;
-    }
-    .btn-solve {
-      background: white; color: var(--brand-from); font-weight: 700;
-      font-size: 1.15rem; padding: 0.85rem 3rem; border-radius: 50px;
-      border: none; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn-solve:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
+    /* ════════════════════════════════════════════
+       CHALLENGES VIEW
+    ═══════════════════════════════════════════ */
+    .ch-header { padding:1.75rem 1.5rem 1rem; }
+    .ch-header h2 { font-weight:800; font-size:1.5rem; margin-bottom:.25rem; }
+    .ch-header p  { color:var(--muted); font-size:.9rem; }
 
-    /* ── App Shell ─────────────────────────────────── */
-    .app-header {
-      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
-      color: white; padding: 1rem 1.5rem;
-      display: flex; align-items: center; gap: 1rem;
+    .filter-bar {
+      padding:.75rem 1.5rem 1rem;
+      display:flex; flex-wrap:wrap; gap:.75rem; align-items:center;
+      background:white; border-bottom:1px solid var(--border);
     }
-    .app-header .brand { font-size: 1.4rem; font-weight: 800; cursor: pointer; }
-    .breadcrumb-nav { font-size: 0.9rem; opacity: 0.85; }
-    .breadcrumb-nav span { cursor: pointer; }
-    .breadcrumb-nav span:hover { text-decoration: underline; }
+    .filter-bar input {
+      border:1px solid var(--border); border-radius:8px;
+      padding:.45rem .9rem; font-size:.88rem; outline:none; width:220px;
+    }
+    .filter-bar input:focus { border-color:var(--brand); }
+    .filter-bar select {
+      border:1px solid var(--border); border-radius:8px;
+      padding:.45rem .9rem; font-size:.88rem; outline:none;
+      background:white; cursor:pointer;
+    }
+    .filter-bar select:focus { border-color:var(--brand); }
+    .filter-count { margin-left:auto; font-size:.82rem; color:var(--muted); }
 
-    /* ── Topics Grid ───────────────────────────────── */
+    /* Challenge cards grid */
+    .ch-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:1.25rem; padding:1.25rem 1.5rem 2.5rem; }
+    .ch-card {
+      background:white; border-radius:16px; padding:1.75rem 1.5rem;
+      cursor:pointer; transition:all .25s; position:relative; text-align:center;
+      box-shadow:0 2px 12px rgba(0,0,0,.07); border:2px solid transparent;
+    }
+    .ch-card:hover:not(.ch-locked) { transform:translateY(-5px); box-shadow:0 10px 30px rgba(102,126,234,.2); border-color:var(--brand); }
+    .ch-card.ch-solved  { border-color:#10b981; }
+    .ch-card.ch-locked  { opacity:.5; cursor:not-allowed; }
+    .ch-card-badge  { position:absolute; top:12px; right:12px; font-size:1.1rem; }
+    .ch-card-num    { font-size:.72rem; font-weight:700; color:var(--muted); letter-spacing:.5px; margin-bottom:.5rem; text-transform:uppercase; }
+    .ch-card-icon   { font-size:2.8rem; margin-bottom:.75rem; line-height:1; }
+    .ch-card-title  { font-weight:700; font-size:.97rem; margin-bottom:.6rem; }
+    .topic-tag { display:inline-flex; align-items:center; gap:.3rem; background:#f1f5f9; border-radius:6px; padding:.2rem .6rem; font-size:.75rem; color:var(--muted); }
+
+    .diff-badge { font-size:.73rem; font-weight:600; padding:3px 10px; border-radius:20px; }
+    .diff-Easy   { background:#d4edda; color:#155724; }
+    .diff-Medium { background:#fff3cd; color:#856404; }
+    .diff-Hard   { background:#f8d7da; color:#721c24; }
+
+    /* ════════════════════════════════════════════
+       TOPICS VIEW
+    ═══════════════════════════════════════════ */
     .topic-card {
-      background: white; border-radius: 16px; padding: 1.75rem;
-      cursor: pointer; transition: all 0.25s;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07); border: 2px solid transparent;
-      position: relative; overflow: hidden;
+      background:white; border-radius:16px; padding:1.75rem; cursor:pointer;
+      box-shadow:0 2px 12px rgba(0,0,0,.06); border:2px solid transparent; transition:all .25s;
+      position:relative;
     }
-    .topic-card:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(102,126,234,0.2); border-color: var(--brand-from); }
-    .topic-card.locked { opacity: 0.6; cursor: default; }
-    .topic-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-    .topic-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .topic-desc { font-size: 0.85rem; color: #666; margin-bottom: 1rem; }
-    .topic-progress { font-size: 0.8rem; color: #888; }
-    .coming-soon-badge {
-      position: absolute; top: 12px; right: 12px;
-      background: #f0f0f0; color: #999;
-      font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
-    }
+    .topic-card:hover:not(.locked) { transform:translateY(-5px); box-shadow:0 10px 30px rgba(102,126,234,.18); border-color:var(--brand); }
+    .topic-card.locked { opacity:.5; cursor:default; }
+    .cs-badge { position:absolute; top:12px; right:12px; background:#f0f0f0; color:#999; font-size:.7rem; font-weight:600; padding:3px 10px; border-radius:20px; }
 
-    /* ── Problem List ──────────────────────────────── */
-    .problem-row {
-      background: white; border-radius: 12px; padding: 1.1rem 1.4rem;
-      cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid transparent;
+    /* ════════════════════════════════════════════
+       PROBLEMS LIST
+    ═══════════════════════════════════════════ */
+    .prob-row {
+      background:white; border-radius:12px; padding:1.1rem 1.4rem; cursor:pointer;
+      box-shadow:0 1px 6px rgba(0,0,0,.06); border-left:4px solid transparent; transition:all .2s;
     }
-    .problem-row:hover { box-shadow: 0 4px 16px rgba(102,126,234,0.18); border-left-color: var(--brand-from); }
-    .problem-row.solved { border-left-color: #28a745; }
-    .difficulty-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
-    .diff-Easy   { background: #d4edda; color: #155724; }
-    .diff-Medium { background: #fff3cd; color: #856404; }
-    .diff-Hard   { background: #f8d7da; color: #721c24; }
+    .prob-row:hover:not(.locked) { box-shadow:0 4px 16px rgba(102,126,234,.18); border-left-color:var(--brand); }
+    .prob-row.solved  { border-left-color:#10b981; }
+    .prob-row.locked  { opacity:.5; cursor:not-allowed; }
 
-    /* ── Solver ────────────────────────────────────── */
-    .solver-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.09); overflow: hidden; }
-    .code-editor {
-      font-family: 'Consolas', 'Monaco', monospace; font-size: 13.5px;
-      border: 1px solid #dee2e6; border-radius: 8px; resize: vertical;
-    }
-    .output-box {
-      background: #1e1e2e; color: #cdd6f4;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 13px; border-radius: 8px; white-space: pre-wrap;
-      min-height: 140px; padding: 1rem;
-    }
-    .problem-data-box {
-      background: #f8f9ff; border: 1px solid #e0e4ff; border-radius: 10px;
-      padding: 1rem 1.25rem; font-family: 'Consolas', monospace; font-size: 14px;
-      margin-bottom: 1rem;
-    }
-    .guess-history { max-height: 200px; overflow-y: auto; }
-    .guess-entry {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.35rem 0.75rem; border-radius: 8px; margin-bottom: 4px; font-size: 0.88rem;
-    }
-    .guess-entry.too_low  { background: #fff3cd; }
-    .guess-entry.too_high { background: #f8d7da; }
-    .guess-entry.correct  { background: #d4edda; }
+    /* ════════════════════════════════════════════
+       SOLVER
+    ═══════════════════════════════════════════ */
+    .solver-card { background:white; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,.08); overflow:hidden; }
+    .code-editor { font-family:'Consolas','Monaco',monospace; font-size:13.5px; resize:vertical; }
+    .output-box  { background:#1e1e2e; color:#cdd6f4; font-family:'Consolas','Monaco',monospace; font-size:13px; border-radius:8px; white-space:pre-wrap; min-height:140px; padding:1rem; }
+
+    /* ════════════════════════════════════════════
+       STEP SIMULATION
+    ═══════════════════════════════════════════ */
+    .arr-box { min-width:52px; height:60px; border:2px solid #dee2e6; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-size:1rem; background:white; transition:all .2s; }
+    .arr-box small { font-size:10px; color:#aaa; line-height:1; }
+    .arr-active  { border-color:var(--brand)!important; background:#eef0ff!important; }
+    .arr-compare { border-color:#fd7e14!important; background:#fff3cd!important; }
+    .arr-winner  { border-color:#10b981!important; background:#d4edda!important; }
+    .arr-done    { opacity:.4; }
+    .arr-sel     { border-color:var(--brand)!important; background:var(--brand)!important; color:white!important; }
+    .arr-sel small { color:rgba(255,255,255,.8); }
+
+    .char-box   { min-width:40px; height:48px; border:2px solid #dee2e6; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; background:white; }
+    .char-active { border-color:var(--brand)!important; background:#eef0ff!important; }
+    .char-vowel  { border-color:#10b981!important; background:#d4edda!important; }
+    .char-cons   { border-color:#dc3545!important; background:#f8d7da!important; }
+    .char-done   { opacity:.4; }
+    .char-built  { border-color:#17a2b8!important; background:#d1ecf1!important; }
+    .char-left   { border-color:#667eea!important; background:#eef0ff!important; }
+    .char-right  { border-color:#764ba2!important; background:#f3eeff!important; }
+
+    .sim-wrap  { background:#f8f9ff; border:1px solid #e0e4ff; border-radius:12px; padding:1.25rem; }
+    .sim-state { font-size:.92rem; padding:.75rem 1rem; background:white; border-radius:8px; border:1px solid #e9ecef; }
+
+    /* ── Code Connection Panel ──────────────────── */
+    .code-hint-label { font-size:.72rem; font-weight:600; color:var(--muted); letter-spacing:.4px; text-transform:uppercase; margin-bottom:.35rem; }
+    .code-hint-box   { background:#1e1e2e; color:#a5b4fc; font-family:'Consolas','Monaco',monospace; font-size:12.5px; padding:.75rem 1rem; border-radius:8px; white-space:pre; border-left:3px solid #667eea; }
+
+    /* ── Aha Bridge ─────────────────────────────── */
+    .aha-bridge { border:2px solid #10b981; border-radius:14px; padding:1.5rem; background:#f0fdf4; margin-top:1rem; }
+    .aha-bridge h6 { font-weight:800; color:#065f46; font-size:1rem; }
+    .aha-table { width:100%; border-collapse:collapse; font-size:.85rem; margin-top:.75rem; }
+    .aha-table th { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.4px; padding:.5rem .75rem; border-bottom:2px solid #d1fae5; text-align:left; }
+    .aha-table td { padding:.6rem .75rem; border-bottom:1px solid #d1fae5; vertical-align:middle; }
+    .aha-table td:first-child { color:#374151; }
+    .aha-table td code { background:#1e1e2e; color:#a5b4fc; padding:.2rem .55rem; border-radius:4px; font-size:.8rem; }
+    .aha-stat { background:#dbeafe; border-radius:8px; padding:.65rem 1rem; font-size:.85rem; margin-top:.75rem; color:#1e40af; }
+
+    /* ── Guess Mode Bridge ──────────────────────── */
+    .guess-bridge { background:#f0fdf4; border:2px solid #10b981; border-radius:12px; padding:1.25rem; margin-top:1rem; }
+    .guess-bridge table { font-size:.83rem; width:100%; }
+    .guess-bridge td { padding:.4rem .6rem; }
+    .guess-bridge td:first-child { color:var(--muted); }
+    .guess-bridge td code { background:#1e1e2e; color:#a5b4fc; padding:.15rem .45rem; border-radius:4px; font-size:.78rem; }
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════════════════ HOME -->
-<div id="view-home" class="view active">
-  <div>
-    <div class="home-title">AutoMate It</div>
-    <p class="home-subtitle mt-3">
-      Master Data Structures &amp; Algorithms through hands-on coding challenges.
-      Write real Python, get real feedback.
+<!-- ═══════════════════════ LANDING ═══════════════════════ -->
+<div id="view-landing" class="view active">
+
+  <nav class="landing-nav">
+    <span class="brand">AutoMate It</span>
+    <span class="nav-right">Interactive DSA Learning Platform</span>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-label">🎯 Learn DSA the right way</div>
+    <h1>Stop Solving.<br>Start <span>Automating.</span></h1>
+    <p>
+      Most people memorize DSA solutions. AutoMate It teaches you to understand
+      problems so deeply that you can write code to automate the solution yourself.
     </p>
-    <button class="btn btn-solve" onclick="goTopics()">Start Solving →</button>
+    <button class="btn-enter" onclick="goMode()">Enter Platform →</button>
+  </section>
+
+  <section class="steps">
+    <h2>How It Works</h2>
+    <p class="sub">Three steps — from understanding to automation</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <h3>Solve Manually</h3>
+        <p>Walk through the problem step by step — just like a human would, without any code. Build the intuition first.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <h3>Write the Automation</h3>
+        <p>Now write real Python code that automates exactly what you just did manually. Watch it execute on the server.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <h3>Understand Complexity</h3>
+        <p>See why your solution is O(n), O(log n), or O(n²) — and compare approaches to understand efficiency.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <h2>Why AutoMate It?</h2>
+    <div class="feat-grid">
+      <div class="feat-item">
+        <div class="feat-icon">⚡</div>
+        <strong>Real Python Execution</strong><br>
+        <span style="opacity:.75;font-size:.82rem">No simulations — your code actually runs on the server</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🔒</div>
+        <strong>Progressive Unlocking</strong><br>
+        <span style="opacity:.75;font-size:.82rem">Master the basics before the harder problems unlock</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🧩</div>
+        <strong>Step-by-Step Manual Mode</strong><br>
+        <span style="opacity:.75;font-size:.82rem">Interactive simulations that teach the process, not just the answer</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🏗</div>
+        <strong>Scaffold Code</strong><br>
+        <span style="opacity:.75;font-size:.82rem">Fill-in-the-blanks challenges — not pre-solved examples</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ═══════════════════════ MODE SELECTION ════════════════ -->
+<div id="view-mode" class="view">
+  <div class="mode-inner">
+  <button class="mode-back" onclick="goLanding()">← Back to Home</button>
+  <h2 class="mode-heading">How would you like to practice?</h2>
+  <p class="mode-sub">Choose your preferred learning style</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="goChallenges()">
+      <div class="mc-icon">🏆</div>
+      <h3>Solve by Challenges</h3>
+      <p>All problems in one view. Filter by topic, difficulty, or status — jump straight to any problem.</p>
+      <div class="mc-stat">10 challenges across 4 topics</div>
+      <div class="mc-btn">Browse Challenges →</div>
+    </div>
+    <div class="mode-card" onclick="goTopicsView()">
+      <div class="mc-icon">📚</div>
+      <h3>Solve by DSA Topics</h3>
+      <p>Navigate by category. Searching → Arrays → Strings → Sorting, each building on the last.</p>
+      <div class="mc-stat">4 topics available · 4 coming soon</div>
+      <div class="mc-btn">Explore Topics →</div>
+    </div>
+  </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════ APP SHELL -->
-<div id="app-shell" style="display:none;">
-  <div class="app-header">
-    <div class="brand" onclick="goHome()">AutoMate It</div>
-    <div class="breadcrumb-nav" id="breadcrumb"></div>
+<!-- ═══════════════════════ APP SHELL ════════════════════ -->
+<div id="app-shell" style="display:none">
+
+  <!-- Persistent top nav -->
+  <nav class="app-nav">
+    <span class="brand" onclick="goMode()">AutoMate It</span>
+    <div class="nav-tabs-custom">
+      <div class="nav-tab" id="nav-ch" onclick="goChallenges()">🏆 Challenges</div>
+      <div class="nav-tab" id="nav-tp" onclick="goTopicsView()">📚 Topics</div>
+    </div>
+    <span class="nav-right" id="nav-progress"></span>
+  </nav>
+
+  <!-- Breadcrumb (shown in problems/solver) -->
+  <div class="bc-bar" id="bc-bar" style="display:none">
+    <span id="bc-content"></span>
   </div>
 
-  <!-- Topics View -->
+  <!-- CHALLENGES VIEW -->
+  <div id="view-challenges" class="view">
+    <div class="ch-header">
+      <h2>All Challenges</h2>
+      <p>Filter and jump to any problem. Problems marked 🔒 require completing the previous one first.</p>
+    </div>
+    <div class="filter-bar">
+      <input id="ch-search" type="text" placeholder="🔍  Search problems…" oninput="renderChallenges()" />
+      <select id="ch-topic" onchange="renderChallenges()">
+        <option value="all">All Topics</option>
+        <option value="1">🔍 Searching</option>
+        <option value="2">📊 Arrays</option>
+        <option value="3">🔤 Strings</option>
+        <option value="4">🔀 Sorting</option>
+      </select>
+      <select id="ch-diff" onchange="renderChallenges()">
+        <option value="all">All Difficulties</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+      </select>
+      <select id="ch-status" onchange="renderChallenges()">
+        <option value="all">All Status</option>
+        <option value="solved">✅ Solved</option>
+        <option value="unsolved">⬜ Unsolved</option>
+        <option value="locked">🔒 Locked</option>
+      </select>
+      <span class="filter-count" id="ch-count"></span>
+    </div>
+    <div class="ch-grid" id="ch-grid"></div>
+  </div>
+
+  <!-- TOPICS VIEW -->
   <div id="view-topics" class="view container py-4">
-    <h4 class="mb-1 fw-bold">Choose a Topic</h4>
-    <p class="text-muted mb-4">Select a data structure or algorithm category to begin.</p>
+    <h4 class="fw-bold mb-1">DSA Topics</h4>
+    <p class="text-muted mb-4">Choose a category. Complete problems in order to unlock the next.</p>
     <div id="topics-grid" class="row g-3"></div>
   </div>
 
-  <!-- Problems View -->
+  <!-- PROBLEMS VIEW -->
   <div id="view-problems" class="view container py-4">
-    <h4 class="mb-1 fw-bold" id="topic-heading"></h4>
-    <p class="text-muted mb-4" id="topic-subheading"></p>
+    <h4 class="fw-bold mb-1" id="prob-heading"></h4>
+    <p class="text-muted mb-3">Complete problems in order — each one unlocks the next.</p>
     <div id="problems-list" class="d-flex flex-column gap-3"></div>
   </div>
 
-  <!-- Solver View -->
+  <!-- SOLVER VIEW -->
   <div id="view-solver" class="view container py-4">
     <div class="solver-card">
-      <!-- Header -->
       <div class="p-4 pb-0">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div>
-            <h5 class="fw-bold mb-1" id="solver-title"></h5>
-            <span id="solver-difficulty" class="difficulty-badge"></span>
+            <h5 class="fw-bold mb-1" id="s-title"></h5>
+            <span id="s-diff" class="diff-badge"></span>
           </div>
-          <span id="solver-solved-badge"></span>
+          <span id="s-solved"></span>
         </div>
-        <p class="text-muted mt-2 mb-0" id="solver-description"></p>
+        <p class="text-muted mt-2 mb-0" id="s-desc"></p>
       </div>
-
-      <!-- Tabs -->
       <div class="px-4 pt-3">
-        <ul class="nav nav-tabs" id="solverTabs">
-          <li class="nav-item">
-            <button class="nav-link active" id="tab-manual-btn" onclick="switchTab('manual')">🎮 Manual</button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" id="tab-code-btn" onclick="switchTab('code')">🤖 Automate</button>
-          </li>
+        <ul class="nav nav-tabs">
+          <li class="nav-item"><button class="nav-link active" id="tab-m-btn" onclick="tab('manual')">🎮 Manual</button></li>
+          <li class="nav-item"><button class="nav-link"        id="tab-c-btn" onclick="tab('code')">🤖 Automate</button></li>
         </ul>
       </div>
 
       <!-- Manual Tab -->
-      <div id="tab-manual" class="p-4">
-        <div class="alert alert-info" id="manual-instructions"></div>
-
-        <!-- Guess mode: number input -->
-        <div id="manual-guess-ui">
+      <div id="tab-m" class="p-4">
+        <div class="alert alert-info mb-3" id="m-instr"></div>
+        <div id="m-guess" style="display:none">
           <div class="d-flex gap-2 mb-3" style="max-width:320px">
-            <input type="number" id="guess-input" class="form-control" placeholder="Enter number (1–100)" min="1" max="100" onkeydown="if(event.key==='Enter') submitManual()" />
+            <input type="number" id="g-input" class="form-control" placeholder="1 – 100" min="1" max="100" onkeydown="if(event.key==='Enter')submitManual()" />
             <button class="btn btn-primary" onclick="submitManual()">Guess</button>
           </div>
-          <div class="guess-history" id="guess-history"></div>
+          <div id="g-history" style="max-height:200px;overflow-y:auto"></div>
         </div>
+        <div id="m-sim" style="display:none">
+          <div class="sim-wrap mb-3">
+            <div id="sim-visual" class="mb-3"></div>
+            <div id="sim-state" class="sim-state mb-3"></div>
+            <div id="sim-q" class="fw-semibold mb-2"></div>
+            <div id="sim-btns" class="d-flex gap-2 flex-wrap"></div>
+          </div>
+          <div id="sim-fb" class="alert py-2" style="display:none"></div>
+          <div id="sim-prog" class="text-muted small mt-1"></div>
 
-        <!-- Answer mode: data display + text input -->
-        <div id="manual-answer-ui" style="display:none">
-          <div class="problem-data-box" id="manual-data-display"></div>
-          <div class="d-flex gap-2 mb-3" style="max-width:480px">
-            <input type="text" id="answer-input" class="form-control" placeholder="Your answer…" onkeydown="if(event.key==='Enter') submitManual()" />
-            <button class="btn btn-primary" onclick="submitManual()">Submit</button>
+          <!-- Live code connection — shown during each simulation step -->
+          <div id="code-hint-wrap" class="mt-3" style="display:none">
+            <div class="code-hint-label">💻 This step in code:</div>
+            <div id="code-hint-box" class="code-hint-box"></div>
           </div>
         </div>
 
-        <div id="manual-result" class="alert mt-2" style="display:none"></div>
+        <!-- Aha Bridge — shown after manual simulation completes -->
+        <div id="aha-bridge" class="aha-bridge" style="display:none">
+          <h6>🎯 You just did this manually — here's what the code does:</h6>
+          <table class="aha-table">
+            <thead><tr><th>What you did manually</th><th>Code equivalent</th></tr></thead>
+            <tbody id="aha-rows"></tbody>
+          </table>
+          <div id="aha-stat" class="aha-stat"></div>
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <button class="btn btn-primary" onclick="goAutomate()">🤖 Write the code yourself →</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="restartSim()">↺ Try again</button>
+          </div>
+        </div>
+
+        <!-- Guess-mode bridge — shown after correct manual guess -->
+        <div id="guess-bridge" class="guess-bridge" style="display:none">
+          <strong style="color:#065f46">🎯 Here's what you just did — in code:</strong>
+          <table class="mt-2"><tbody id="guess-bridge-rows"></tbody></table>
+          <div id="guess-bridge-stat" class="aha-stat mt-2"></div>
+          <button class="btn btn-primary btn-sm mt-3" onclick="goAutomate()">🤖 Now automate it →</button>
+        </div>
+
+        <div id="m-result" class="alert mt-3" style="display:none"></div>
         <button class="btn btn-outline-secondary btn-sm mt-2" onclick="loadHint()">💡 Get Hint</button>
         <div id="hint-box" class="alert alert-info mt-2" style="display:none"></div>
       </div>
 
       <!-- Code Tab -->
-      <div id="tab-code" class="p-4" style="display:none">
-        <div class="alert alert-secondary" id="code-instructions"></div>
-
+      <div id="tab-c" class="p-4" style="display:none">
         <div class="mb-3">
           <label class="form-label fw-semibold">Python Code</label>
-          <textarea id="code-editor" class="form-control code-editor" rows="14"></textarea>
+          <textarea id="code-ed" class="form-control code-editor" rows="14"></textarea>
         </div>
-
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-          <button class="btn btn-success" onclick="runCode()">▶ Run Code</button>
-          <button class="btn btn-outline-secondary" onclick="loadExample()">📋 Load Example</button>
-          <button class="btn btn-outline-danger" onclick="clearCode()">🗑 Clear</button>
+        <div class="d-flex gap-2 flex-wrap mb-3">
+          <button class="btn btn-success"          onclick="runCode()">▶ Run Code</button>
+          <button class="btn btn-outline-secondary" onclick="loadExample()">📋 Show Solution</button>
+          <button class="btn btn-outline-warning"  onclick="loadScaffold()">🏗 Try Yourself</button>
+          <button class="btn btn-outline-danger"   onclick="clearCode()">🗑 Clear</button>
         </div>
-
         <label class="form-label fw-semibold">Output</label>
-        <div id="output-box" class="output-box">Run your code to see output here…</div>
-
-        <div id="code-result" class="alert mt-3" style="display:none"></div>
+        <div id="out-box" class="output-box">Run your code to see output here…</div>
+        <div id="c-result" class="alert mt-3" style="display:none"></div>
       </div>
-    </div><!-- /solver-card -->
-  </div><!-- /view-solver -->
+    </div>
+  </div>
+
 </div><!-- /app-shell -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const API = '/api';
-let state = { topicId: null, topicName: '', problemId: null, problem: null, guessMode: false };
+const state = { mode:null, topicId:null, topicName:'', problemId:null, problem:null };
+let activeSim = null;
+let allProblems = []; // cache for challenges view
 
-// ════════════════════════════════ NAVIGATION
+const TOPIC_META = {
+  1: { name:'Searching', icon:'🔍' },
+  2: { name:'Arrays',    icon:'📊' },
+  3: { name:'Strings',   icon:'🔤' },
+  4: { name:'Sorting',   icon:'🔀' },
+};
+
+// ═══════════════════════════════ VIEW MANAGEMENT
 
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
 }
 
-function goHome() {
-  document.getElementById('app-shell').style.display = 'none';
-  document.getElementById('view-home').style.display = 'flex';
-  document.getElementById('view-home').classList.add('active');
+function shell(show) {
+  document.getElementById('app-shell').style.display = show ? 'block' : 'none';
 }
 
-async function goTopics() {
-  document.getElementById('view-home').style.display = 'none';
-  document.getElementById('app-shell').style.display = 'block';
-  setBreadcrumb([{ label: 'Topics' }]);
+function setNavActive(tab) {
+  document.getElementById('nav-ch').classList.toggle('active', tab === 'challenges');
+  document.getElementById('nav-tp').classList.toggle('active', tab === 'topics');
+}
+
+function setBc(items) {
+  const bar = document.getElementById('bc-bar');
+  if (!items || items.length === 0) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  document.getElementById('bc-content').innerHTML = items.map((it, i) => {
+    const sep = i ? '<span class="bc-sep">/</span>' : '';
+    return it.fn
+      ? `${sep}<span onclick="(${it.fn.toString()})()">${it.label}</span>`
+      : `${sep}<span style="color:var(--text)">${it.label}</span>`;
+  }).join('');
+}
+
+// ═══════════════════════════════ NAVIGATION
+
+function goLanding() {
+  shell(false);
+  document.getElementById('view-landing').classList.add('active');
+  document.getElementById('view-mode').classList.remove('active');
+}
+
+function goMode() {
+  document.getElementById('view-landing').classList.remove('active');
+  document.getElementById('view-mode').classList.add('active');
+}
+
+async function goChallenges() {
+  state.mode = 'challenges';
+  shell(true);
+  setNavActive('challenges');
+  setBc(null);
+  showView('view-challenges');
+  await loadAllProblems();
+  renderChallenges();
+}
+
+async function goTopicsView() {
+  state.mode = 'topics';
+  shell(true);
+  setNavActive('topics');
+  setBc(null);
   showView('view-topics');
   await loadTopics();
 }
 
-async function goProblems(topicId, topicName) {
-  state.topicId = topicId; state.topicName = topicName;
-  setBreadcrumb([
-    { label: 'Topics', action: goTopics },
-    { label: topicName }
-  ]);
+async function goProblems(tid, tname) {
+  state.topicId = tid; state.topicName = tname;
+  setBc([{label:'Topics', fn:goTopicsView}, {label:tname}]);
   showView('view-problems');
-  await loadProblems(topicId, topicName);
+  await loadProblems(tid, tname);
 }
 
-async function goSolver(problemId) {
-  state.problemId = problemId;
-  setBreadcrumb([
-    { label: 'Topics', action: goTopics },
-    { label: state.topicName, action: () => goProblems(state.topicId, state.topicName) },
-    { label: '…' }
-  ]);
+async function goSolver(pid) {
+  state.problemId = pid;
+  setBc(null); // will be set after problem loads
   showView('view-solver');
-  await loadSolver(problemId);
+  await loadSolver(pid);
 }
 
-function setBreadcrumb(items) {
-  const el = document.getElementById('breadcrumb');
-  el.innerHTML = items.map((item, i) => {
-    const sep = i === 0 ? '' : '<span class="mx-1 opacity-50">/</span>';
-    if (item.action)
-      return `${sep}<span onclick="(${item.action.toString()})()">${item.label}</span>`;
-    return `${sep}<span class="opacity-75">${item.label}</span>`;
+// ═══════════════════════════════ CHALLENGES
+
+async function loadAllProblems() {
+  if (allProblems.length > 0) {
+    // refresh solved states
+    const topics = await fetchJ(`${API}/topics`);
+    const available = topics.filter(t => t.isAvailable);
+    const lists = await Promise.all(available.map(t => fetchJ(`${API}/topics/${t.topicId}/problems`)));
+    allProblems = lists.flat();
+    return;
+  }
+  const topics = await fetchJ(`${API}/topics`);
+  const available = topics.filter(t => t.isAvailable);
+  const lists = await Promise.all(available.map(t => fetchJ(`${API}/topics/${t.topicId}/problems`)));
+  allProblems = lists.flat();
+}
+
+const PROBLEM_ICONS = {
+  1:'🔍', 2:'⚡', 3:'📈', 4:'📉', 5:'➕',
+  6:'🔄', 7:'↩️', 8:'🔤', 9:'🫧', 10:'🔢'
+};
+
+function renderChallenges() {
+  const search = document.getElementById('ch-search').value.toLowerCase();
+  const topic  = document.getElementById('ch-topic').value;
+  const diff   = document.getElementById('ch-diff').value;
+  const status = document.getElementById('ch-status').value;
+
+  const filtered = allProblems.filter(p => {
+    if (topic  !== 'all' && String(p.topicId) !== topic) return false;
+    if (diff   !== 'all' && p.difficulty !== diff) return false;
+    if (status === 'solved'   && !p.isSolved) return false;
+    if (status === 'unsolved' && (p.isSolved || p.isLocked)) return false;
+    if (status === 'locked'   && !p.isLocked) return false;
+    if (search && !p.title.toLowerCase().includes(search) && !(TOPIC_META[p.topicId]?.name||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('ch-count').textContent = `${filtered.length} problem${filtered.length!==1?'s':''}`;
+
+  const grid = document.getElementById('ch-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem">No problems match your filters.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const tm    = TOPIC_META[p.topicId] || {};
+    const icon  = PROBLEM_ICONS[p.problemId] || tm.icon || '📝';
+    const badge = p.isSolved ? '✅' : p.isLocked ? '🔒' : '';
+    const click = p.isLocked ? '' : `onclick="goSolverFromCh(${p.problemId})"`;
+    return `<div class="ch-card ${p.isSolved?'ch-solved':''} ${p.isLocked?'ch-locked':''}" ${click}>
+      ${badge ? `<div class="ch-card-badge">${badge}</div>` : ''}
+      <div class="ch-card-num">#${p.problemId}</div>
+      <div class="ch-card-icon">${icon}</div>
+      <div class="ch-card-title">${p.title}</div>
+      <div class="mb-2"><span class="topic-tag">${tm.icon||''} ${tm.name||''}</span></div>
+      <span class="diff-badge diff-${p.difficulty}">${p.difficulty}</span>
+      ${p.isLocked?`<div style="font-size:.72rem;color:var(--muted);margin-top:.6rem">Complete previous to unlock</div>`:''}
+    </div>`;
   }).join('');
 }
 
-// ════════════════════════════════ TOPICS
+async function goSolverFromCh(pid) {
+  state.mode = 'challenges';
+  state.problemId = pid;
+  showView('view-solver');
+  await loadSolver(pid);
+}
+
+// ═══════════════════════════════ TOPICS
 
 async function loadTopics() {
   const grid = document.getElementById('topics-grid');
   grid.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>';
-  const topics = await fetchJSON(`${API}/topics`);
+  const topics = await fetchJ(`${API}/topics`);
+  // Update nav progress
+  const avail = topics.filter(t => t.isAvailable);
+  const solved = avail.reduce((s,t) => s + t.solvedCount, 0);
+  const total  = avail.reduce((s,t) => s + t.problemCount, 0);
+  document.getElementById('nav-progress').textContent = `${solved}/${total} solved`;
+
   grid.innerHTML = topics.map(t => `
     <div class="col-sm-6 col-lg-3">
-      <div class="topic-card ${t.isAvailable ? '' : 'locked'}" onclick="${t.isAvailable ? `goProblems(${t.topicId}, '${t.name}')` : ''}">
-        ${!t.isAvailable ? '<span class="coming-soon-badge">Coming Soon</span>' : ''}
-        <div class="topic-icon">${t.icon}</div>
-        <div class="topic-name">${t.name}</div>
-        <div class="topic-desc">${t.description}</div>
-        ${t.isAvailable ? `
-          <div class="topic-progress">
-            ${t.solvedCount}/${t.problemCount} solved
-            <div class="progress mt-1" style="height:5px">
-              <div class="progress-bar bg-success" style="width:${t.problemCount ? (t.solvedCount/t.problemCount*100) : 0}%"></div>
-            </div>
-          </div>` : ''}
+      <div class="topic-card ${t.isAvailable?'':'locked'}" onclick="${t.isAvailable?`goProblems(${t.topicId},'${t.name}')`:''}" >
+        ${!t.isAvailable?'<span class="cs-badge">Coming Soon</span>':''}
+        <div style="font-size:2.5rem">${t.icon}</div>
+        <div class="fw-bold mt-2">${t.name}</div>
+        <div class="text-muted small mt-1 mb-3">${t.description}</div>
+        ${t.isAvailable?`
+          <div style="font-size:.8rem;color:var(--muted)">${t.solvedCount}/${t.problemCount} solved</div>
+          <div class="progress mt-1" style="height:5px">
+            <div class="progress-bar bg-success" style="width:${t.problemCount?(t.solvedCount/t.problemCount*100):0}%"></div>
+          </div>`:''}
       </div>
     </div>`).join('');
 }
 
-// ════════════════════════════════ PROBLEMS
+// ═══════════════════════════════ PROBLEMS
 
-async function loadProblems(topicId, topicName) {
-  document.getElementById('topic-heading').textContent = topicName;
-  document.getElementById('topic-subheading').textContent = 'Choose a problem to solve.';
+async function loadProblems(tid, tname) {
+  document.getElementById('prob-heading').textContent = tname;
   const list = document.getElementById('problems-list');
   list.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
-  const problems = await fetchJSON(`${API}/topics/${topicId}/problems`);
-  list.innerHTML = problems.map(p => `
-    <div class="problem-row ${p.isSolved ? 'solved' : ''}" onclick="goSolver(${p.problemId})">
+  const probs = await fetchJ(`${API}/topics/${tid}/problems`);
+  list.innerHTML = probs.map(p => `
+    <div class="prob-row ${p.isSolved?'solved':''} ${p.isLocked?'locked':''}"
+         onclick="${p.isLocked?'':(`goSolver(${p.problemId})`)}">
       <div class="d-flex align-items-center justify-content-between">
         <div>
-          <div class="fw-semibold">${p.title}
-            ${p.isSolved ? ' <span class="text-success ms-1">✅</span>' : ''}
+          <div class="fw-semibold">
+            ${p.isLocked?'🔒 ':''}${p.title}
+            ${p.isSolved?' <span class="text-success small">✅ Solved</span>':''}
           </div>
-          <div class="text-muted small mt-1">${p.description}</div>
+          <div class="text-muted small mt-1">${p.isLocked?'Complete the previous problem to unlock':p.description}</div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <span class="difficulty-badge diff-${p.difficulty}">${p.difficulty}</span>
-          <span class="text-muted">›</span>
+          <span class="diff-badge diff-${p.difficulty}">${p.difficulty}</span>
+          ${!p.isLocked?'<span class="text-muted">›</span>':''}
         </div>
       </div>
     </div>`).join('');
 }
 
-// ════════════════════════════════ SOLVER
+// ═══════════════════════════════ SOLVER
 
-async function loadSolver(problemId) {
-  const p = await fetchJSON(`${API}/problems/${problemId}`);
+async function loadSolver(pid) {
+  const p = await fetchJ(`${API}/problems/${pid}`);
   state.problem = p;
-  state.guessMode = p.problemData?.type === 'guess';
 
-  // Update breadcrumb with real title
-  setBreadcrumb([
-    { label: 'Topics', action: goTopics },
-    { label: state.topicName, action: () => goProblems(state.topicId, state.topicName) },
-    { label: p.title }
-  ]);
+  const tm = TOPIC_META[p.topicId] || {};
 
-  document.getElementById('solver-title').textContent = p.title;
-  document.getElementById('solver-description').textContent = p.description;
-  const diffEl = document.getElementById('solver-difficulty');
-  diffEl.textContent = p.difficulty;
-  diffEl.className = `difficulty-badge diff-${p.difficulty}`;
-  document.getElementById('solver-solved-badge').innerHTML = p.isSolved
-    ? '<span class="badge bg-success fs-6">✅ Solved</span>' : '';
-
-  // Instructions
-  document.getElementById('manual-instructions').innerHTML =
-    `<strong>Instructions:</strong> ${p.instructions}`;
-  document.getElementById('code-instructions').innerHTML =
-    state.guessMode
-      ? `<strong>Available:</strong> <code>guess(n)</code> — returns <code>'too_low'</code>, <code>'too_high'</code>, or <code>'correct'</code>. The variable <code>number</code> is NOT available; you must search for it.`
-      : `<strong>Available:</strong> problem data is injected as Python variables. Call <code>answer(result)</code> exactly once with your computed answer.`;
-
-  // Manual tab UI
-  if (state.guessMode) {
-    document.getElementById('manual-guess-ui').style.display = '';
-    document.getElementById('manual-answer-ui').style.display = 'none';
-    document.getElementById('guess-history').innerHTML = '';
-    document.getElementById('guess-input').value = '';
+  // Set breadcrumb based on mode
+  if (state.mode === 'challenges') {
+    setBc([{label:'Challenges', fn:goChallenges}, {label:p.title}]);
+    setNavActive('challenges');
   } else {
-    document.getElementById('manual-guess-ui').style.display = 'none';
-    document.getElementById('manual-answer-ui').style.display = '';
-    renderDataDisplay(p.problemData);
-    document.getElementById('answer-input').value = '';
+    setBc([{label:'Topics',fn:goTopicsView},{label:state.topicName,fn:()=>goProblems(state.topicId,state.topicName)},{label:p.title}]);
+    setNavActive('topics');
   }
 
-  // Reset result/hint
-  document.getElementById('manual-result').style.display = 'none';
-  document.getElementById('hint-box').style.display = 'none';
-  document.getElementById('output-box').textContent = 'Run your code to see output here…';
-  document.getElementById('code-result').style.display = 'none';
+  document.getElementById('s-title').textContent = p.title;
+  document.getElementById('s-desc').textContent  = p.description;
+  const db = document.getElementById('s-diff');
+  db.textContent = p.difficulty; db.className = `diff-badge diff-${p.difficulty}`;
+  document.getElementById('s-solved').innerHTML = p.isSolved ? '<span class="badge bg-success fs-6">✅ Solved</span>' : '';
 
-  // Load example code
-  loadExample();
-  switchTab('manual');
+  const isGuess = p.problemData?.type === 'guess';
+  document.getElementById('m-instr').innerHTML = p.manualInstructions || p.instructions;
+
+  document.getElementById('m-guess').style.display = isGuess ? '' : 'none';
+  document.getElementById('m-sim').style.display   = isGuess ? 'none' : '';
+
+  if (isGuess) {
+    document.getElementById('g-input').value = '';
+    document.getElementById('g-history').innerHTML = '';
+  } else {
+    activeSim = makeSim(pid, p.problemData);
+    renderSim();
+  }
+
+  document.getElementById('m-result').style.display       = 'none';
+  document.getElementById('hint-box').style.display        = 'none';
+  document.getElementById('aha-bridge').style.display      = 'none';
+  document.getElementById('guess-bridge').style.display    = 'none';
+  document.getElementById('code-hint-wrap').style.display  = 'none';
+  document.getElementById('out-box').textContent           = 'Run your code to see output here…';
+  document.getElementById('c-result').style.display        = 'none';
+
+  loadScaffold();
+  tab('manual');
 }
 
-function renderDataDisplay(data) {
-  const el = document.getElementById('manual-data-display');
-  if (!data) { el.textContent = ''; return; }
-  const lines = [];
-  if (data.arr !== undefined) lines.push(`arr = [${data.arr.join(', ')}]`);
-  if (data.target !== undefined) lines.push(`target = ${data.target}`);
-  if (data.s !== undefined) lines.push(`s = "${data.s}"`);
-  el.textContent = lines.join('\n');
+function tab(which) {
+  document.getElementById('tab-m').style.display = which==='manual' ? '' : 'none';
+  document.getElementById('tab-c').style.display = which==='code'   ? '' : 'none';
+  document.getElementById('tab-m-btn').classList.toggle('active', which==='manual');
+  document.getElementById('tab-c-btn').classList.toggle('active', which==='code');
 }
 
-// ════════════════════════════════ TABS
-
-function switchTab(tab) {
-  document.getElementById('tab-manual').style.display = tab === 'manual' ? '' : 'none';
-  document.getElementById('tab-code').style.display   = tab === 'code'   ? '' : 'none';
-  document.getElementById('tab-manual-btn').classList.toggle('active', tab === 'manual');
-  document.getElementById('tab-code-btn').classList.toggle('active', tab === 'code');
-}
-
-// ════════════════════════════════ MANUAL
+// ═══════════════════════════════ MANUAL
 
 async function submitManual() {
-  const value = state.guessMode
-    ? document.getElementById('guess-input').value
-    : document.getElementById('answer-input').value;
+  const input = document.getElementById('g-input');
+  const val = input.value;
+  if (!val.trim()) return;
 
-  if (!value.trim()) return;
+  const res = await postJ(`${API}/problems/${state.problemId}/manual`, {value: val});
+  const hist = document.getElementById('g-history');
+  const isLinear = state.problemId === 1;
+  const guessNum = hist.children.length + 1;
 
-  const res = await postJSON(`${API}/problems/${state.problemId}/manual`, { value });
-
-  if (state.guessMode) {
-    const history = document.getElementById('guess-history');
-    const entry = document.createElement('div');
-    entry.className = `guess-entry ${res.feedback}`;
-    entry.innerHTML = `<strong>Guess ${value}:</strong> ${res.message}`;
-    history.prepend(entry);
-    if (res.isCorrect) {
-      document.getElementById('guess-input').value = '';
-      showResult('manual-result', res.message, 'success');
-      refreshSolvedBadge();
-    }
+  let displayMsg, bg;
+  if (res.isCorrect) {
+    displayMsg = `Found it in ${guessNum} guess(es)!`;
+    bg = '#d4edda';
+  } else if (isLinear) {
+    const next = parseInt(val) + 1;
+    displayMsg = `Not ${val}. Try ${next <= 100 ? next : '—'}.`;
+    bg = '#f8f9fa';
+    if (next <= 100) input.value = next;
   } else {
-    showResult('manual-result', res.message, res.isCorrect ? 'success' : 'warning');
-    if (res.isCorrect) refreshSolvedBadge();
+    displayMsg = res.message;
+    bg = res.feedback === 'too_low' ? '#fff3cd' : '#f8d7da';
+  }
+
+  const e = document.createElement('div');
+  e.style.cssText = `display:flex;gap:.5rem;padding:.35rem .75rem;border-radius:8px;margin-bottom:4px;font-size:.88rem;background:${bg}`;
+  e.innerHTML = `<strong>${val}:</strong> ${displayMsg}`;
+  hist.prepend(e);
+
+  if (res.isCorrect) {
+    showR('m-result', displayMsg, 'success');
+    showGuessBridge(state.problemId, guessNum);
+    refreshBadge(); refreshProgress();
   }
 }
 
-// ════════════════════════════════ CODE
+// ═══════════════════════════════ CODE
 
-function loadExample() {
-  document.getElementById('code-editor').value = state.problem?.exampleCode || '';
-}
-
-function clearCode() {
-  document.getElementById('code-editor').value = '';
-  document.getElementById('output-box').textContent = 'Run your code to see output here…';
-  document.getElementById('code-result').style.display = 'none';
+function loadExample()  { document.getElementById('code-ed').value = state.problem?.exampleCode  || ''; }
+function loadScaffold() { document.getElementById('code-ed').value = state.problem?.scaffoldCode || state.problem?.exampleCode || ''; }
+function clearCode()    {
+  document.getElementById('code-ed').value = '';
+  document.getElementById('out-box').textContent = 'Run your code to see output here…';
+  document.getElementById('c-result').style.display = 'none';
 }
 
 async function runCode() {
-  const code = document.getElementById('code-editor').value.trim();
+  const code = document.getElementById('code-ed').value.trim();
   if (!code) { alert('Write some code first.'); return; }
-
   const btn = document.querySelector('button[onclick="runCode()"]');
   btn.disabled = true; btn.textContent = '⏳ Running…';
-
-  document.getElementById('output-box').textContent = 'Executing…';
-  document.getElementById('code-result').style.display = 'none';
-
+  document.getElementById('out-box').textContent = 'Executing…';
+  document.getElementById('c-result').style.display = 'none';
   try {
-    const res = await postJSON(`${API}/problems/${state.problemId}/code`, { code });
-    document.getElementById('output-box').textContent = res.isSuccess ? res.output : `Error:\n${res.error}`;
-
+    const res = await postJ(`${API}/problems/${state.problemId}/code`, {code});
+    document.getElementById('out-box').textContent = res.isSuccess ? res.output : `Error:\n${res.error}`;
     if (res.isSuccess) {
-      const correct = res.isCorrect === true;
-      const wrong   = res.isCorrect === false;
-      const statusMsg = correct
-        ? `✅ Correct!${res.guessCount ? ` Found in <strong>${res.guessCount}</strong> guess(es).` : ''}`
-        : wrong ? `❌ Code ran but the answer was incorrect.${res.guessCount ? ` (${res.guessCount} guess(es) made)` : ''}` : '';
-
-      const complexity = res.timeComplexity ? `<strong>⏱ Complexity:</strong> ${res.timeComplexity}` : '';
-      const parts = [complexity, statusMsg].filter(Boolean).join('<br>');
-      if (parts) showResult('code-result', parts, correct ? 'success' : 'warning');
-
-      if (correct) refreshSolvedBadge();
+      const ok = res.isCorrect === true;
+      const msg = ok
+        ? `✅ Correct!${res.guessCount?` Found in <strong>${res.guessCount}</strong> guess(es).`:''}<br>${res.timeComplexity?`<strong>Complexity:</strong> ${res.timeComplexity}`:''}`
+        : `❌ Code ran but the answer was incorrect.${res.guessCount?` (${res.guessCount} guess(es))`:''}<br>${res.timeComplexity?`<strong>Complexity:</strong> ${res.timeComplexity}`:''}`;
+      showR('c-result', msg, ok ? 'success' : 'warning');
+      if (ok) { refreshBadge(); refreshProgress(); }
     }
-  } finally {
-    btn.disabled = false; btn.textContent = '▶ Run Code';
-  }
+  } finally { btn.disabled = false; btn.textContent = '▶ Run Code'; }
 }
 
-// ════════════════════════════════ HINTS
+// ═══════════════════════════════ HINTS
 
 async function loadHint() {
   const box = document.getElementById('hint-box');
-  const data = await fetchJSON(`${API}/problems/${state.problemId}/hints`);
-  box.innerHTML = `<strong>💡 Hints:</strong><ul class="mb-0 mt-1">${data.hints.map(h => `<li>${h}</li>`).join('')}</ul>`;
+  const d = await fetchJ(`${API}/problems/${state.problemId}/hints`);
+  box.innerHTML = `<strong>💡 Hints:</strong><ul class="mb-0 mt-1">${d.hints.map(h=>`<li>${h}</li>`).join('')}</ul>`;
   box.style.display = '';
 }
 
-// ════════════════════════════════ HELPERS
+// ═══════════════════════════════ STEP SIMULATIONS
 
-function showResult(id, msg, type) {
+function makeSim(pid, data) {
+  const arr = data.arr ? [...data.arr] : null;
+  const s   = data.s   || null;
+  const tgt = data.target !== undefined ? data.target : null;
+  const map = {
+    3:()=>extremeSim(arr,'max'), 4:()=>extremeSim(arr,'min'),
+    5:()=>twoSumSim(arr,tgt),
+    6:()=>palindromeSim(s),     7:()=>reverseStrSim(s),
+    8:()=>countVowelsSim(s),    9:()=>bubbleSortSim(arr),
+   10:()=>countOccSim(arr,tgt),
+  };
+  return map[pid] ? map[pid]() : null;
+}
+
+function renderSim() {
+  if (!activeSim) return;
+  document.getElementById('sim-visual').innerHTML = activeSim.visual();
+  document.getElementById('sim-state').innerHTML  = activeSim.stateInfo();
+  document.getElementById('sim-q').innerHTML      = activeSim.question();
+  document.getElementById('sim-prog').textContent = activeSim.progress();
+  document.getElementById('sim-btns').innerHTML   = activeSim.actions().map(b =>
+    `<button class="btn btn-sm ${b.cls}" onclick="simAct('${b.id}')">${b.label}</button>`
+  ).join('');
+
+  // Live code connection panel
+  if (activeSim.codeHint) {
+    document.getElementById('code-hint-box').textContent = activeSim.codeHint();
+    document.getElementById('code-hint-wrap').style.display = '';
+  }
+}
+
+async function simAct(id) {
+  if (!activeSim) return;
+  document.getElementById('sim-btns').querySelectorAll('button').forEach(b => b.disabled = true);
+  const r = activeSim.handle(id);
+
+  if (r.done) {
+    const res = await postJ(`${API}/problems/${state.problemId}/manual`, {value:String(r.answer)});
+    if (res.isCorrect) {
+      showAhaBridge(activeSim);
+      refreshBadge(); refreshProgress();
+    } else {
+      const fb = document.getElementById('sim-fb');
+      fb.innerHTML = `❌ Something went wrong. Please try again.`;
+      fb.className = 'alert alert-danger py-2'; fb.style.display = '';
+    }
+    return;
+  }
+
+  if (r.feedback) {
+    const fb = document.getElementById('sim-fb');
+    fb.innerHTML = r.feedback; fb.className = `alert alert-${r.type||'info'} py-2`; fb.style.display = '';
+    setTimeout(() => { fb.style.display = 'none'; renderSim(); }, 1800);
+    return;
+  }
+  renderSim();
+}
+
+function showAhaBridge(sim) {
+  // Hide active simulation controls
+  document.getElementById('sim-btns').innerHTML = '';
+  document.getElementById('sim-prog').textContent = '';
+  document.getElementById('sim-fb').style.display = 'none';
+  document.getElementById('code-hint-wrap').style.display = 'none';
+
+  // Build the mapping table
+  const rows = document.getElementById('aha-rows');
+  const map  = sim?.stepToCode ? sim.stepToCode() : [];
+  rows.innerHTML = map.map(r =>
+    `<tr><td>${r.m}</td><td><code>${r.c}</code></td></tr>`
+  ).join('');
+
+  document.getElementById('aha-stat').innerHTML = sim?.perfStat ? sim.perfStat() : '';
+  document.getElementById('aha-bridge').style.display = '';
+}
+
+function showGuessBridge(pid, guessCount) {
+  const bridges = {
+    1: {
+      rows: [
+        { m:'You started from 1 and tried each number', c:'for i in range(1, 101):' },
+        { m:'You checked if it was the right one',       c:'    result = guess(i)' },
+        { m:'You stopped when you found it',             c:'    if result == "correct": break' },
+      ],
+      stat: `You needed <strong>${guessCount} guess(es)</strong>. Code always starts from 1 and may need up to 100. → <strong>O(n)</strong>`
+    },
+    2: {
+      rows: [
+        { m:'You started with the full range 1–100',     c:'low = 1; high = 100' },
+        { m:'You always picked the middle of the range', c:'mid = (low + high) // 2' },
+        { m:'"Too high" — you ruled out the top half',   c:'high = mid - 1' },
+        { m:'"Too low" — you ruled out the bottom half', c:'low = mid + 1' },
+      ],
+      stat: `You found it in <strong>${guessCount} guess(es)</strong>. Code always needs at most 7 (log₂ 100). → <strong>O(log n)</strong>`
+    }
+  };
+  const b = bridges[pid];
+  if (!b) return;
+  document.getElementById('guess-bridge-rows').innerHTML = b.rows.map(r =>
+    `<tr><td>${r.m}</td><td><code>${r.c}</code></td></tr>`
+  ).join('');
+  document.getElementById('guess-bridge-stat').innerHTML = b.stat;
+  document.getElementById('guess-bridge').style.display = '';
+}
+
+function goAutomate() {
+  tab('code');
+  loadScaffold();
+  document.getElementById('code-ed').focus();
+  document.getElementById('code-ed').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function restartSim() {
+  document.getElementById('aha-bridge').style.display = 'none';
+  activeSim = makeSim(state.problemId, state.problem.problemData);
+  renderSim();
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function arrHTML(arr, opts={}) {
+  return `<div class="d-flex gap-2 flex-wrap">${arr.map((v,i)=>{
+    const hidden = opts.revealUpTo !== undefined && i > opts.revealUpTo;
+    let cls='arr-box';
+    if(hidden) cls+=' arr-done';
+    else if(opts.compare&&opts.compare.includes(i)) cls+=' arr-compare';
+    else if(i===opts.winner) cls+=' arr-winner';
+    else if(opts.highlight&&opts.highlight.includes(i)) cls+=' arr-active';
+    else if(opts.done&&opts.done.includes(i)) cls+=' arr-done';
+    else if(opts.sel&&opts.sel.includes(i)) cls+=' arr-sel';
+    const click=opts.clickable?`style="cursor:pointer" onclick="simCardClick(${i})"`: '';
+    const display = hidden ? '?' : v;
+    return `<div class="${cls}" ${click}>${display}<small>[${i}]</small></div>`;
+  }).join('')}</div>`;
+}
+
+function simCardClick(i) { if(activeSim?.click){activeSim.click(i);renderSim();} }
+
+function strHTML(s, opts={}) {
+  return `<div class="d-flex gap-1 flex-wrap">${s.split('').map((c,i)=>{
+    // hideMiddle: characters between two pointers not yet compared
+    const hiddenMiddle = opts.hideMiddle && i > opts.hideMiddle.from && i < opts.hideMiddle.to;
+    const hiddenFuture = opts.revealUpTo !== undefined && i > opts.revealUpTo;
+    const hidden = hiddenMiddle || hiddenFuture;
+    let cls='char-box';
+    if(hidden) cls+=' char-done';
+    else if(i===opts.left)  cls+=' char-left';
+    else if(i===opts.right) cls+=' char-right';
+    else if(opts.vowelDone!==undefined&&i<opts.vowelDone)
+      cls+=('aeiouAEIOU'.includes(s[i])?' char-vowel':' char-cons');
+    if(!hidden && opts.active===i) cls+=' char-active';
+    const display = hidden ? '?' : c;
+    return `<div><div style="font-size:9px;text-align:center;height:12px">${!hidden&&i===opts.left?'→':!hidden&&i===opts.right?'←':''}</div>
+      <div class="${cls}">${display}</div>
+      <small style="font-size:9px;display:block;text-align:center">${i}</small></div>`;
+  }).join('')}</div>`;
+}
+
+// ── Simulations ────────────────────────────────────────────
+function extremeSim(origArr, kind) {
+  const arr=[...origArr]; let idx=1, extreme=arr[0];
+  const isMax=kind==='max', label=isMax?'maximum':'minimum';
+  const cmp=isMax?(a,b)=>a>b:(a,b)=>a<b;
+  return {
+    visual() {
+      // Reveal elements only up to current — future stay as ? until reached
+      const revealUpTo = idx >= arr.length ? arr.length - 1 : idx;
+      const winnerIdx  = arr.slice(0, revealUpTo + 1).lastIndexOf(extreme);
+      return arrHTML(arr, { highlight:idx < arr.length ? [idx] : [], winner:winnerIdx, revealUpTo });
+    },
+    stateInfo() { return idx>=arr.length?`✅ The ${label} is <strong>${extreme}</strong>.`:`Running ${label}: <strong>${extreme}</strong> | Checking: <strong>${arr[idx]}</strong>`; },
+    question()  { return idx>=arr.length?'Ready to submit?':`Is <strong>${arr[idx]}</strong> ${isMax?'greater than':'less than'} the current ${label} <strong>${extreme}</strong>?`; },
+    actions() {
+      if(idx>=arr.length) return [{id:'done',label:`✅ Submit (${label} = ${extreme})`,cls:'btn-success'}];
+      return [{id:'yes',label:`Yes — ${arr[idx]} is the new ${label}`,cls:'btn-primary'},{id:'no',label:`No — keep ${extreme}`,cls:'btn-outline-secondary'}];
+    },
+    progress() { return `Element ${Math.min(idx+1,arr.length)} of ${arr.length}`; },
+    codeHint() {
+      const v=isMax?'max_val':'min_val', op=isMax?'>':'<';
+      if(idx>=arr.length) return `answer(${v})  # submit the ${label}`;
+      if(idx===1) return `${v} = arr[0]  # initial ${label} = first element\nfor x in arr:\n    if x ${op} ${v}:  # is this ${isMax?'bigger':'smaller'}?\n        ${v} = x  # update ${label}`;
+      return `for x in arr:\n    if x ${op} ${v}:  # is ${arr[idx]} ${isMax?'>':'<'} ${extreme}?\n        ${v} = x`;
+    },
+    stepToCode() {
+      const v=isMax?'max_val':'min_val', op=isMax?'>':'<';
+      return [
+        {m:`Started with arr[0] = ${arr[0]} as the initial ${label}`,   c:`${v} = arr[0]`},
+        {m:`Scanned every element one by one`,                           c:`for x in arr:`},
+        {m:`Asked "is this element ${isMax?'bigger':'smaller'}?"`,       c:`    if x ${op} ${v}:`},
+        {m:`Updated ${label} when the answer was yes`,                   c:`        ${v} = x`},
+        {m:`Submitted the final ${label}`,                               c:`answer(${v})`},
+      ];
+    },
+    perfStat() { return `You scanned <strong>${arr.length} elements</strong> → loop runs ${arr.length} times → Time complexity: <strong>O(n)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true,answer:String(extreme)};
+      const curr=arr[idx],should=cmp(curr,extreme),userYes=id==='yes';
+      let feedback,type;
+      if(userYes!==should){
+        feedback=should?`Not quite! ${curr} ${isMax?'>':'<'} ${extreme} → ${curr} becomes the new ${label}.`:`Not quite! ${curr} is not ${isMax?'greater':'less'} than ${extreme} → keep ${extreme}.`;
+        type='warning';
+      } else { feedback=should?`Correct! New ${label}: ${curr}`:`Correct! ${extreme} stays.`; type='success'; }
+      if(should) extreme=curr; idx++;
+      return {feedback,type};
+    }
+  };
+}
+
+function twoSumSim(origArr, target) {
+  const arr=[...origArr]; let sel=[];
+  return {
+    visual()    { return arrHTML(arr,{sel,clickable:true}); },
+    stateInfo() {
+      if(sel.length===0) return `Click two cards that add up to <strong>${target}</strong>.`;
+      if(sel.length===1) return `Selected arr[${sel[0]}] = ${arr[sel[0]]}. Click the second card.`;
+      const sum=arr[sel[0]]+arr[sel[1]];
+      return sum===target?`✅ arr[${sel[0]}] + arr[${sel[1]}] = ${arr[sel[0]]} + ${arr[sel[1]]} = <strong>${target}</strong>!`:`❌ ${arr[sel[0]]} + ${arr[sel[1]]} = ${sum} ≠ ${target}. Try again.`;
+    },
+    question()  { return sel.length<2?'Select two indices:':arr[sel[0]]+arr[sel[1]]===target?'Correct pair!':'Wrong pair — click different cards.'; },
+    actions() {
+      if(sel.length===2&&arr[sel[0]]+arr[sel[1]]===target) return [{id:'done',label:'✅ Submit Answer',cls:'btn-success'}];
+      if(sel.length===2) return [{id:'clear',label:'🔄 Clear selection',cls:'btn-outline-secondary'}];
+      return [];
+    },
+    progress() { return `Target: ${target} | Selected: ${sel.length}/2`; },
+    codeHint() {
+      return `for i in range(len(arr)):\n    for j in range(i+1, len(arr)):\n        if arr[i] + arr[j] == target:\n            answer([i, j])`;
+    },
+    stepToCode() {
+      return [
+        {m:'Picked a first index to try',                   c:'for i in range(len(arr)):'},
+        {m:'Tried every other index (different from first)', c:'    for j in range(i+1, len(arr)):'},
+        {m:'Checked if the pair adds up to the target',     c:'        if arr[i] + arr[j] == target:'},
+        {m:'Submitted the matching pair of indices',        c:'            answer([i, j])'},
+      ];
+    },
+    perfStat() { return `Two nested loops checking every pair → Time complexity: <strong>O(n²)</strong>`; },
+    click(i) { if(sel.includes(i)){sel=sel.filter(x=>x!==i);}else if(sel.length<2){sel.push(i);}else{sel=[i];} },
+    handle(id) {
+      if(id==='done') return {done:true,answer:sel.join(',')};
+      if(id==='clear'){sel=[];return {};} return {};
+    }
+  };
+}
+
+function palindromeSim(s) {
+  let left=0,right=s.length-1,isPalin=true;
+  return {
+    visual() {
+      // Hide characters between the pointers — only reveal them when a pointer reaches them
+      const hideMiddle = (left < right - 1) ? {from:left, to:right} : null;
+      return strHTML(s, {left, right, hideMiddle});
+    },
+    stateInfo() { return left>right?`✅ All pairs checked — it <strong>${isPalin?'IS':'is NOT'}</strong> a palindrome.`:`Comparing position ${left} ('<strong>${s[left]}</strong>') with position ${right} ('<strong>${s[right]}</strong>')`; },
+    question()  { return left>right?'Ready to submit?':`Do <strong>'${s[left]}'</strong> and <strong>'${s[right]}'</strong> match?`; },
+    actions() {
+      if(left>right) return [{id:'done',label:`✅ Submit (${isPalin?'palindrome':'not palindrome'})`,cls:'btn-success'}];
+      return [{id:'match',label:`✅ Yes, they match`,cls:'btn-primary'},{id:'nomatch',label:`❌ No, they differ`,cls:'btn-outline-danger'}];
+    },
+    progress() { return `Pair ${left+1} of ${Math.ceil(s.length/2)}`; },
+    codeHint() {
+      if(left>right) return `answer(${isPalin})  # final verdict`;
+      return `while left < right:\n    if s[left] != s[right]:  # '${s[left]}' vs '${s[right]}'\n        answer(False)\n    left += 1; right -= 1  # move inward`;
+    },
+    stepToCode() {
+      return [
+        {m:'Started one pointer at each end of the string',         c:'left = 0; right = len(s) - 1'},
+        {m:'Compared the two outer characters',                     c:'if s[left] != s[right]:'},
+        {m:'Found mismatch → not a palindrome, stopped immediately',c:'    answer(False)'},
+        {m:'All matched → moved both pointers inward',              c:'left += 1; right -= 1'},
+        {m:'Reached the middle → all pairs matched → palindrome',   c:'answer(True)'},
+      ];
+    },
+    perfStat() { return `You compared <strong>${Math.ceil(s.length/2)} pairs</strong> → loop runs ${Math.ceil(s.length/2)} times → Time complexity: <strong>O(n)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true,answer:String(isPalin)};
+      const doMatch=s[left]===s[right],userMatch=id==='match';
+      let feedback,type;
+      if(userMatch!==doMatch){feedback=doMatch?`Not quite! '${s[left]}' and '${s[right]}' DO match.`:`Not quite! '${s[left]}' ≠ '${s[right]}' — mismatch!`;type='warning';}
+      else{feedback=doMatch?`Correct! '${s[left]}' = '${s[right]}'.`:`Correct! Mismatch found.`;type='success';}
+      if(!doMatch) isPalin=false; left++; right--;
+      return {feedback,type};
+    }
+  };
+}
+
+function reverseStrSim(s) {
+  let built='', pos=s.length-1;
+  const uniqueChars = [...new Set(s.split(''))];
+
+  // Returns correct character + up to 2 decoys, sorted for stable order
+  function choices() {
+    const correct = s[pos];
+    const decoys  = uniqueChars.filter(c=>c!==correct).slice(0, 2);
+    return [correct, ...decoys].sort();
+  }
+
+  return {
+    visual() {
+      const orig = s.split('').map((c,i)=>
+        `<div class="char-box${i>pos?' char-done':i===pos?' char-active':''}">${c}</div>`
+      ).join('');
+      const rev = built.split('').map(c=>`<div class="char-box char-built">${c}</div>`).join('')
+        + Array(s.length-built.length).fill(`<div class="char-box" style="background:#f8f9fa;color:#ccc">?</div>`).join('');
+      return `<div class="mb-2">
+        <div class="text-muted small mb-1">Original string (highlighted = current position):</div>
+        <div class="d-flex gap-1 flex-wrap mb-3">${orig}</div>
+        <div class="text-muted small mb-1">Building reversed (${built.length}/${s.length}):</div>
+        <div class="d-flex gap-1 flex-wrap">${rev}</div>
+      </div>`;
+    },
+    stateInfo() { return pos<0?`✅ Reversed: <strong>"${built}"</strong>`:`Position <strong>${pos}</strong> of the original string is currently highlighted.`; },
+    question()  { return pos<0?'All characters added!':'Which character comes next in the reversed string?'; },
+    actions() {
+      if(pos<0) return [{id:'done',label:`✅ Submit ("${built}")`,cls:'btn-success'}];
+      return choices().map(c=>({id:`pick:${c}`, label:`'${c}'`, cls:'btn-outline-primary'}));
+    },
+    progress() { return `Character ${s.length-pos} of ${s.length}`; },
+    codeHint() {
+      if(pos<0) return `answer(reversed_s)  # submit reversed string`;
+      return `reversed_s = ""\nfor ch in s:\n    reversed_s = ch + reversed_s  # prepend '${s[pos]}' → put it at the front`;
+    },
+    stepToCode() {
+      return [
+        {m:'Started with an empty result string',              c:'reversed_s = ""'},
+        {m:'Went through each character of the original',      c:'for ch in s:'},
+        {m:'Put each character at the FRONT of the result',    c:'    reversed_s = ch + reversed_s'},
+        {m:'Submitted the completed reversed string',          c:'answer(reversed_s)'},
+      ];
+    },
+    perfStat() { return `You placed <strong>${s.length} characters</strong> → loop runs ${s.length} times → Time complexity: <strong>O(n)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true, answer:built};
+      if(id.startsWith('pick:')) {
+        const chosen = id.slice(5), correct = s[pos], cur = pos;
+        built += correct; pos--;
+        if(chosen===correct)
+          return {feedback:`Correct! '${correct}' added → "${built}"`, type:'success'};
+        return {feedback:`Not quite! Position ${cur} holds <strong>'${correct}'</strong>, not '${chosen}'. Added '${correct}' → "${built}"`, type:'warning'};
+      }
+      return {};
+    }
+  };
+}
+
+function countVowelsSim(s) {
+  let idx=0,count=0; const V='aeiouAEIOU';
+  return {
+    visual()    { return strHTML(s,{active:idx, vowelDone:idx, revealUpTo:idx}); },
+    stateInfo() { return idx>=s.length?`✅ Vowel count: <strong>${count}</strong>`:`Checking: <strong>'${s[idx]}'</strong> | Vowels found: <strong>${count}</strong>`; },
+    question()  { return idx>=s.length?'All characters checked!': `Is <strong>'${s[idx]}'</strong> a vowel? (a, e, i, o, u)`; },
+    actions() {
+      if(idx>=s.length) return [{id:'done',label:`✅ Submit (count = ${count})`,cls:'btn-success'}];
+      return [{id:'vowel',label:`✅ Yes, it's a vowel`,cls:'btn-primary'},{id:'cons',label:`❌ No, it's a consonant`,cls:'btn-outline-secondary'}];
+    },
+    progress() { return `Character ${idx+1} of ${s.length} | Count: ${count}`; },
+    codeHint() {
+      if(idx>=s.length) return `answer(count)  # total vowels found`;
+      return `for ch in s:\n    if ch in vowels:  # is '${s[idx]}' in "aeiouAEIOU"?\n        count += 1  # ${V.includes(s[idx])?'yes — increment':'no — skip'}`;
+    },
+    stepToCode() {
+      return [
+        {m:'Defined which characters count as vowels', c:'vowels = "aeiouAEIOU"'},
+        {m:'Scanned every character of the string',    c:'for ch in s:'},
+        {m:'Checked if character is in the vowel set', c:'    if ch in vowels:'},
+        {m:'Incremented counter for each vowel found', c:'        count += 1'},
+        {m:'Submitted the final count',                c:'answer(count)'},
+      ];
+    },
+    perfStat() { return `You checked <strong>${s.length} characters</strong> → loop runs ${s.length} times → Time complexity: <strong>O(n)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true,answer:String(count)};
+      const isV=V.includes(s[idx]),userV=id==='vowel';
+      let feedback,type;
+      if(userV!==isV){feedback=isV?`Not quite! '${s[idx]}' IS a vowel.`:`Not quite! '${s[idx]}' is not a vowel.`;type='warning';}
+      else{feedback=isV?`Correct! '${s[idx]}' is a vowel.`:`Correct! '${s[idx]}' is a consonant.`;type='success';}
+      if(isV) count++; idx++;
+      return {feedback,type};
+    }
+  };
+}
+
+function bubbleSortSim(origArr) {
+  const arr=[...origArr],n=arr.length; let pass=0,j=0,swaps=0;
+  function adv(){j++;if(j>=n-pass-1){pass++;j=0;}}
+  function done(){return pass>=n-1;}
+  return {
+    visual()    { return arrHTML(arr,{compare:done()?[]:[j,j+1]}); },
+    stateInfo() { return done()?`✅ Sorted in <strong>${swaps}</strong> swap(s)! → [${arr.join(', ')}]`:`Pass ${pass+1}/${n-1} | Comparing arr[${j}]=${arr[j]} and arr[${j+1}]=${arr[j+1]}`; },
+    question()  { return done()?'Sorting complete!':`arr[${j}] = <strong>${arr[j]}</strong> and arr[${j+1}] = <strong>${arr[j+1]}</strong> — should we swap them?`; },
+    actions() {
+      if(done()) return [{id:'done',label:'✅ Submit sorted array',cls:'btn-success'}];
+      return [{id:'swap',label:`↔ Yes, swap them`,cls:'btn-warning'},{id:'keep',label:`➡ No, keep order`,cls:'btn-outline-secondary'}];
+    },
+    progress() { return done()?'Sorted!':`Pass ${pass+1}/${n-1} | Step ${j+1}/${n-pass-1}`; },
+    codeHint() {
+      if(done()) return `answer(arr)  # submit the sorted array`;
+      return `for i in range(n):\n    for j in range(0, n-i-1):\n        if arr[j] > arr[j+1]:  # ${arr[j]} > ${arr[j+1]}?\n            arr[j], arr[j+1] = arr[j+1], arr[j]`;
+    },
+    stepToCode() {
+      return [
+        {m:'Repeated a full pass for each element',              c:'for i in range(n):'},
+        {m:'Compared each adjacent pair in the pass',            c:'    for j in range(0, n-i-1):'},
+        {m:'Asked "is the left element bigger than the right?"', c:'        if arr[j] > arr[j+1]:'},
+        {m:'Swapped them — the bigger one moves right ("bubbles up")', c:'            arr[j], arr[j+1] = arr[j+1], arr[j]'},
+        {m:'Submitted the fully sorted array',                   c:'answer(arr)'},
+      ];
+    },
+    perfStat() { return `Up to <strong>${n*(n-1)/2} comparisons</strong> (${n}×${n-1}÷2 pairs) → Time complexity: <strong>O(n²)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true,answer:arr.join(',')};
+      const should=arr[j]>arr[j+1],userSwap=id==='swap';
+      let feedback,type;
+      if(userSwap!==should){feedback=should?`Not quite! ${arr[j]} > ${arr[j+1]} → should swap.`:`Not quite! ${arr[j]} ≤ ${arr[j+1]} → no swap.`;type='warning';}
+      else{feedback=should?`Correct! Swapping ${arr[j]} ↔ ${arr[j+1]}.`:`Correct! Already in order.`;type='success';}
+      if(should){[arr[j],arr[j+1]]=[arr[j+1],arr[j]];swaps++;} adv();
+      return {feedback,type};
+    }
+  };
+}
+
+function countOccSim(origArr, target) {
+  const arr=[...origArr]; let idx=0,count=0;
+  return {
+    visual()    { return arrHTML(arr,{highlight:[idx], revealUpTo:idx}); },
+    stateInfo() { return idx>=arr.length?`✅ <strong>${target}</strong> appears <strong>${count}</strong> time(s).`:`Looking for <strong>${target}</strong> | Checking: <strong>${arr[idx]}</strong> | Count: <strong>${count}</strong>`; },
+    question()  { return idx>=arr.length?'All elements checked!':`Does <strong>${arr[idx]}</strong> equal the target <strong>${target}</strong>?`; },
+    actions() {
+      if(idx>=arr.length) return [{id:'done',label:`✅ Submit (count = ${count})`,cls:'btn-success'}];
+      return [{id:'match',label:`✅ Yes, it matches`,cls:'btn-primary'},{id:'skip',label:`❌ No, skip it`,cls:'btn-outline-secondary'}];
+    },
+    progress() { return `Element ${idx+1} of ${arr.length} | Count: ${count}`; },
+    codeHint() {
+      if(idx>=arr.length) return `answer(count)  # total occurrences found`;
+      return `for x in arr:\n    if x == target:  # does ${arr[idx]} equal ${target}?\n        count += 1  # ${arr[idx]===target?'yes — count it':'no — skip it'}`;
+    },
+    stepToCode() {
+      return [
+        {m:'Scanned every element in the array',        c:'for x in arr:'},
+        {m:'Checked if each element matches the target',c:'    if x == target:'},
+        {m:'Incremented counter on each match',         c:'        count += 1'},
+        {m:'Submitted the total occurrence count',      c:'answer(count)'},
+      ];
+    },
+    perfStat() { return `You checked <strong>${arr.length} elements</strong> → loop runs ${arr.length} times → Time complexity: <strong>O(n)</strong>`; },
+    handle(id) {
+      if(id==='done') return {done:true,answer:String(count)};
+      const isM=arr[idx]===target,userM=id==='match';
+      let feedback,type;
+      if(userM!==isM){feedback=isM?`Not quite! ${arr[idx]} = ${target}.`:`Not quite! ${arr[idx]} ≠ ${target}.`;type='warning';}
+      else{feedback=isM?`Correct! ${arr[idx]} = ${target}.`:`Correct! ${arr[idx]} ≠ ${target}.`;type='success';}
+      if(isM) count++; idx++;
+      return {feedback,type};
+    }
+  };
+}
+
+// ═══════════════════════════════ UTILS
+
+function refreshBadge() {
+  document.getElementById('s-solved').innerHTML = '<span class="badge bg-success fs-6">✅ Solved</span>';
+  // invalidate challenge cache so filters refresh
+  allProblems = [];
+}
+
+function refreshProgress() {
+  // silently reload topic progress in nav
+  fetchJ(`${API}/topics`).then(topics => {
+    const avail = topics.filter(t => t.isAvailable);
+    const solved = avail.reduce((s,t) => s+t.solvedCount, 0);
+    const total  = avail.reduce((s,t) => s+t.problemCount, 0);
+    document.getElementById('nav-progress').textContent = `${solved}/${total} solved`;
+  }).catch(()=>{});
+}
+
+function showR(id, msg, type) {
   const el = document.getElementById(id);
-  el.innerHTML = msg;
-  el.className = `alert alert-${type}`;
-  el.style.display = '';
+  el.innerHTML = msg; el.className = `alert alert-${type}`; el.style.display = '';
 }
 
-function refreshSolvedBadge() {
-  document.getElementById('solver-solved-badge').innerHTML =
-    '<span class="badge bg-success fs-6">✅ Solved</span>';
-  // Also refresh topics/problems lists in background
-}
-
-async function fetchJSON(url) {
+async function fetchJ(url) {
   const r = await fetch(url);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
-async function postJSON(url, body) {
-  const r = await fetch(url, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+async function postJ(url, body) {
+  const r = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   return r.json();
 }
 </script>
